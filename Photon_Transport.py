@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
+import multiprocessing as mp
+
 
 np.random.seed(1234)
 
@@ -64,5 +66,6 @@ def run():
     # Last Photon? Then End.
 
     print ('Run')
-    
 
+
+print(f"Number of cpu: {mp.cpu_count()}")
