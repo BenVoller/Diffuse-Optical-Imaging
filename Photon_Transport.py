@@ -73,10 +73,7 @@ def run(numberPhotons):
 
 if __name__ == '__main__':
     t0 = time.time()
-    results = [for i in range(1000):
-        run(0)]
-    t2 = time.time()
-    '''
+    
     n_cpu = mp.cpu_count()  # = 8 
     numberPhotons = 100000 # Number of photons
 
@@ -86,7 +83,6 @@ if __name__ == '__main__':
     t1 = time.time()
     
     print ('parallel time: ', t1 - t0)
-    '''
-    print ('Series Time: ', t2 - t0)
+
 
 
