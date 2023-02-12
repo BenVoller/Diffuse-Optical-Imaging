@@ -10,8 +10,13 @@ class photons():
 
     def __init__(self, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
-        self.pos = [0,0,0]
-        self.vel = [0,0,1]
+        self.pos = np.array([0,0,0])
+        self.vel = np.array([0,0,1])
+
+        # Extinction coefficient
+        self.mu_t = 1
+        self.s_ = 0
+        
 
         self.W = weight 
 
@@ -28,7 +33,11 @@ class photons():
         self.W += -Rsp
 
     def stepSize(self):
-        pass
+        
+        eta = np.random.random()
+
+        self.s_ = -np.log(eta)
+
 
     def boundary_distance(self):
         # This to me looks very computationally intensive I think it would be better to move the photon and if 
@@ -36,7 +45,7 @@ class photons():
         pass 
 
     def move(self):
-        pass
+        self.pos = self.pos + self.vel*self.s_
 
     def reflect(self):
         pass
@@ -78,10 +87,14 @@ def run(medium):
         #print (photon.pos)
 
         photon.fresnelReflection(medium.n0, medium.n1)
+        photon.stepSize()
+        photon.move()
+        print(photon.pos)
         print(photon.W)
         # Set step size of photon according to -ln(eta) where eta is a psuedo random number
 
         # Find Boundary distance or change in medium
+
 
         # If step > distance to boundary d_b * u_t move to boundary and test for reflect or trasmit otherwise move.
 
