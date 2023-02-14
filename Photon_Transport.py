@@ -17,11 +17,17 @@ class photons():
         self.mu_t = 1
         self.s_ = 0
         
+        self.mu_a = 0.25
+        self.mu_t = 0.75
 
         self.W = weight 
 
         # Psuedo Random Number for the step size of the photon movement
-        eta = np.random.random
+        
+
+    def eta(self):
+        return np.random.random()
+        
 
     def fresnelReflection(self, n0, n1):
         
@@ -34,9 +40,9 @@ class photons():
 
     def stepSize(self):
         
-        eta = np.random.random()
+        self.s_ = -np.log(self.eta())
+    
 
-        self.s_ = -np.log(eta)
 
 
     def boundary_distance(self):
@@ -51,16 +57,32 @@ class photons():
         pass
 
     def absorb(self):
-        pass
+        # Once a photon packet reaches an interaction site a fraction of it is absorbed 
+        delW = self.mu_a / self.mu_t * self.W
+
+        # Insert some call to adding the weigh to relative absorption
+
+        self.W -= delW
 
     def scatter(self):
-        pass
+        g = 0.9 # Scattering Anisotropy for most biological tissue 
+
+        if g != 0:
+            costheta = (1/2*g)*(1 + g**2 - ((1-g**2)/(1-g+2*g*self.eta()))**2)
+
+        else:
+            costheta = 2*self.eta() -1
+
+        
 
     def roulette(self):
         pass
 
     def photon_dead(self):
         pass
+
+
+
 
 class mediums():
 
@@ -89,6 +111,7 @@ def run(medium):
         photon.fresnelReflection(medium.n0, medium.n1)
         photon.stepSize()
         photon.move()
+        photon.absorb()
         print(photon.pos)
         print(photon.W)
         # Set step size of photon according to -ln(eta) where eta is a psuedo random number
