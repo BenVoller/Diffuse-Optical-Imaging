@@ -10,6 +10,9 @@ class photons():
 
     def __init__(self, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
+
+        self.alive = True 
+
         self.pos = np.array([0,0,0])
         self.vel = np.array([0,0,1])
 
@@ -68,17 +71,48 @@ class photons():
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
-            costheta = (1/2*g)*(1 + g**2 - ((1-g**2)/(1-g+2*g*self.eta()))**2)
+            theta = np.arccos(1/2*g)*(1 + g**2 - ((1-g**2)/(1-g+2*g*self.eta()))**2)
 
         else:
-            costheta = 2*self.eta() -1
+            theta = np.arccos(2*self.eta() -1)
 
-        
+        phi = 2*np.pi*self.eta()
+
+        # Now define new velocity angles 
+        u_x, u_y, u_z  = self.vel
+
+
+        if abs(u_z) > 0.9999:
+            u_x = np.sin(theta)*np.cos(phi)
+            u_y = np.sin(theta)*np.sin(phi)
+            u_z = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
+
+        else:
+            u_x = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + u_z*np.cos(theta)
+            u_y = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + u_y*np.cos(theta)
+            u_z = np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
+
+        self.vel = np.array([u_x, u_y, u_z])
+
+    
 
     def roulette(self):
-        pass
+        # defines the chance that a photon is terminated
+        m = 10 
+
+        if self.W < 0.0001:
+            eta = self.eta()
+
+            if eta <= 1/m:
+                self.W = m*self.W
+            else:
+                self.W = 0
+                self.alive = False
+
+
 
     def photon_dead(self):
+        # Currently the only mechanism for photon termination is roulette, include boundaries soon.
         pass
 
 
@@ -99,11 +133,12 @@ class mediums():
 
 def run(medium):
     
+    photon = photons(weight=1)
     
-        # Runs the photon trasnport for Monte Carlo photon trasnport 
-        
+    # Runs the photon trasnport for Monte Carlo photon trasnport 
+    while photon.alive:
         # Define Photon
-        photon = photons(weight=1)
+        
         print (photon.pos)
         print (photon.W)
         #print (photon.pos)
@@ -112,8 +147,15 @@ def run(medium):
         photon.stepSize()
         photon.move()
         photon.absorb()
-        print(photon.pos)
-        print(photon.W)
+        photon.scatter()
+        photon.roulette()
+        
+        print('position:{}, velocity: {}, weight: {}'.format(photon.pos, photon.vel, photon.W))
+            
+
+
+
+        
         # Set step size of photon according to -ln(eta) where eta is a psuedo random number
 
         # Find Boundary distance or change in medium
