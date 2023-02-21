@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import time
 
+from material import *
+
 
 np.random.seed(1234)
 
@@ -12,7 +14,7 @@ class photons():
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
         self.alive = True 
-
+        
         self.pos = np.array([0,0,0])
         self.vel = np.array([0,0,1])
 
@@ -137,7 +139,9 @@ class mediums():
 
 def run(medium):
     
+    two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
     photon = photons(weight=1)
+
     
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
@@ -145,7 +149,7 @@ def run(medium):
         
         print (photon.pos)
         print (photon.W)
-        #print (photon.pos)
+       
 
         photon.fresnelReflection(medium.n0, medium.n1)
         photon.stepSize()
