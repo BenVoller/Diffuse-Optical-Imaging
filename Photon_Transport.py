@@ -120,14 +120,18 @@ class photons():
 
 class mediums():
 
-    def __init__(self, refractiveIndex):
+    def __init__(self, size, refractiveIndex1):
 
         # For now this is a homogeneous medium 
         self.n0 = 1
-        self.n1 = refractiveIndex
+        self.n1 = refractiveIndex1
+
+
+
+        self.grid = np.zeros([1000,1000,1000])
+        material_z  = np.ones(1000)
 
         
-        self.grid = np.zeros([1000,1000,1000])
 
 
 
@@ -184,7 +188,7 @@ if __name__ == '__main__':
     n_cpu = mp.cpu_count()  # = 8 
     numberPhotons = 1000 # Number of photons
 
-    medium1 = mediums(refractiveIndex=2)
+    medium1 = mediums(4, refractiveIndex1=2)
 
     #pool = mp.Pool(processes=n_cpu) 
     #results = [pool.map(run, range(numberPhotons , medium1))]
