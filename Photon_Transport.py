@@ -50,10 +50,10 @@ class photons():
 
 
 
-    def boundary_distance(self):
+    def boundary_distance(self, material):
         # This to me looks very computationally intensive I think it would be better to move the photon and if 
         # boundary 
-        pass 
+        pass
 
     def move(self):
         self.pos = self.pos + self.vel*self.s_
@@ -142,6 +142,7 @@ def run(medium):
     two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
     photon = photons(weight=1)
 
+
     
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
@@ -150,8 +151,8 @@ def run(medium):
         print (photon.pos)
         print (photon.W)
        
-
-        photon.fresnelReflection(medium.n0, medium.n1)
+        photon.boundary_distance(two_layer.z_array)
+        photon.fresnelReflection(two_layer.n0, two_layer.n1)
         photon.stepSize()
         photon.move()
         photon.absorb()
