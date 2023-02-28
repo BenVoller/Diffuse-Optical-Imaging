@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 import multiprocessing as mp
+import pandas as pd
 import time
 
 from material import *
@@ -139,6 +140,9 @@ class mediums():
 
 def run(medium):
     
+    names = ['x','y','z','vx','vy','vz']
+    df = pd.DataFrame(columns=names)
+    
     two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
     photon = photons(weight=1)
 
@@ -148,8 +152,8 @@ def run(medium):
     while photon.alive:
         # Define Photon
         
-        print (photon.pos)
-        print (photon.W)
+        #print (photon.pos)
+        #print (photon.W)
        
         photon.boundary_distance(two_layer.z_array)
         photon.fresnelReflection(two_layer.n0, two_layer.n1)
@@ -159,11 +163,7 @@ def run(medium):
         photon.scatter()
         photon.roulette()
         
-        print('position:{}, velocity: {}, weight: {}'.format(photon.pos, photon.vel, photon.W))
-            
-
-
-
+        #print('position:{}, velocity: {}, weight: {}'.format(photon.pos, photon.vel, photon.W))
         
         # Set step size of photon according to -ln(eta) where eta is a psuedo random number
 
@@ -184,8 +184,16 @@ def run(medium):
 
         # Last Photon? Then End.
 
-    
+    # Eventually include wavelength in this.
+      
+    final_pos = pd.DataFrame(data=np.concatenate((photon.pos, photon.vel)), columns=names)
+    print (final_pos.head())
 
+    
+    print (final_pos)
+    df = pd.concat(df, final_pos)
+    print (df.head())
+    
 
 if __name__ == '__main__':
     t0 = time.time()
