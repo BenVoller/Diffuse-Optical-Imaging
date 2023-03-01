@@ -16,12 +16,10 @@ class material():
         self.z_array[:self.depth1] = self.n0
         self.z_array[self.depth1:] = self.n1
 
-    def printArray(self):
-        print(self.z_array)
+    
 
 
-test = material()
-print(test.z_array)
+
 
 
 

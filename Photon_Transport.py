@@ -141,6 +141,7 @@ class mediums():
 def run(medium):
     
     names = ['x','y','z','vx','vy','vz']
+    data = np.empty(len(names))
     df = pd.DataFrame(columns=names)
     
     two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
@@ -152,7 +153,7 @@ def run(medium):
     while photon.alive:
         # Define Photon
         
-        #print (photon.pos)
+        #(photon.pos)
         #print (photon.W)
        
         photon.boundary_distance(two_layer.z_array)
@@ -186,13 +187,14 @@ def run(medium):
 
     # Eventually include wavelength in this.
       
-    final_pos = pd.DataFrame(data=np.concatenate((photon.pos, photon.vel)), columns=names)
-    print (final_pos.head())
+    final_pos = np.concatenate((photon.pos, photon.vel))
+
+    data = np.vstack([data, final_pos])
+    
 
     
-    print (final_pos)
-    df = pd.concat(df, final_pos)
-    print (df.head())
+    print (data)
+    return data
     
 
 if __name__ == '__main__':
