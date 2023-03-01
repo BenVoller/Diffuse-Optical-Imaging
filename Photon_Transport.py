@@ -55,6 +55,7 @@ class photons():
         # This to me looks very computationally intensive I think it would be better to move the photon and if 
         # boundary 
         pass
+        
 
     def move(self):
         self.pos = self.pos + self.vel*self.s_
@@ -139,6 +140,9 @@ class mediums():
 
 
 def run(number):
+
+    if number % 100 == 0:
+        print (number)
     
     two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
     photon = photons(weight=1)
@@ -164,7 +168,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 100 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
     medium1 = mediums(4, refractiveIndex1=2)
 
@@ -177,7 +181,7 @@ if __name__ == '__main__':
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
 
-    print (photon_data)
+    
     # process pool is closed automatically
 
     t1 = time.time()
@@ -185,7 +189,16 @@ if __name__ == '__main__':
     print ('parallel time: ', t1 - t0)
 
     df = pd.DataFrame(data=photon_data, columns=names)
-    print (df.head())
+    df.drop(0, inplace=True)
+    print(df.head())
+    print(df.describe())
+    
+    plt.figure()
+    plt.hist(df['y'], bins=100)
+    plt.show()
+
+
+
 
 
 
