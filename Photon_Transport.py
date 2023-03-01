@@ -138,23 +138,13 @@ class mediums():
 
 
 
-def run(medium):
-    
-    names = ['x','y','z','vx','vy','vz']
-    data = np.empty(len(names))
-    df = pd.DataFrame(columns=names)
+def run(number):
     
     two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
     photon = photons(weight=1)
 
-
-    
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
-        # Define Photon
-        
-        #(photon.pos)
-        #print (photon.W)
        
         photon.boundary_distance(two_layer.z_array)
         photon.fresnelReflection(two_layer.n0, two_layer.n1)
@@ -164,56 +154,38 @@ def run(medium):
         photon.scatter()
         photon.roulette()
         
-        #print('position:{}, velocity: {}, weight: {}'.format(photon.pos, photon.vel, photon.W))
         
-        # Set step size of photon according to -ln(eta) where eta is a psuedo random number
-
-        # Find Boundary distance or change in medium
-
-
-        # If step > distance to boundary d_b * u_t move to boundary and test for reflect or trasmit otherwise move.
-
-        # If not at boundary - Transmit, Absorb or Scatter
-
-        # photon dead test, i,e absorbed or out of bounds 
-
-        # weight check 
-
-        # Roulette 
-
-        # Repeat if photon is still alive
-
-        # Last Photon? Then End.
-
-    # Eventually include wavelength in this.
-      
     final_pos = np.concatenate((photon.pos, photon.vel))
 
-    data = np.vstack([data, final_pos])
-    
-
-    
-    print (data)
-    return data
+    return final_pos
     
 
 if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 100 # Number of photons
 
     medium1 = mediums(4, refractiveIndex1=2)
 
-    #pool = mp.Pool(processes=n_cpu) 
-    #results = [pool.map(run, range(numberPhotons , medium1))]
+    names = ['x','y','z','vx','vy','vz']
+    photon_data = np.empty(len(names))
 
-    run(medium1)
+    # create and configure the process pool
+    with mp.Pool(processes=n_cpu) as pool:
+        # execute tasks in order
+        for result in pool.map(run, range(numberPhotons)):
+            photon_data = np.vstack([photon_data, result])
 
+    print (photon_data)
+    # process pool is closed automatically
 
     t1 = time.time()
     
     print ('parallel time: ', t1 - t0)
+
+    df = pd.DataFrame(data=photon_data, columns=names)
+    print (df.head())
 
 
 
