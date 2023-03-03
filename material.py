@@ -1,20 +1,19 @@
 import numpy as np 
 
-class material():
+class medium():
 
-    def __init__(self, l1depth=1, l1n=1, l2depth=1, l2n=2):
+    def __init__(self, n0=1, z0=2, n1=2, z1=4):
 
-        self.size = l1depth + l2depth
+        self.size = z0 + z1
         # refractive indexes
-        self.depth1  = 1000*l1depth
-        self.depth2  = 1000*l2depth
-        self.n0 = l1n
-        self.n1 = l2n
+        self.z0 = z0
+        self.z1 = z1
+        self.n0 = n0
+        self.n1 = n1
 
         self.z_array = np.ones(1000*self.size)
 
-        self.z_array[:self.depth1] = self.n0
-        self.z_array[self.depth1:] = self.n1
+      
 
     
 

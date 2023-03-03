@@ -11,8 +11,14 @@ np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, weight):
+    def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
+
+        self.n0 = medium.n0
+        self.n1 = medium.n1
+
+        self.z0 = 0
+        self.z1 = medium.z1
 
         self.alive = True 
         
@@ -33,7 +39,32 @@ class photons():
 
     def eta(self):
         return np.random.random()
+    
+    def stepSize(self):
         
+        self.s_ = -np.log(self.eta())
+        
+    def hit_boundary(self):
+        u_z = self.vel[-1]
+        z = self.pos[-1]
+        
+        # Distance to boundary
+        if u_z < 0:
+            db = (self.z0 - z) / u_z
+            # boundary in question
+            b = self.z0
+        elif u_z > 0:
+            db = (self.z1 - z) / u_z
+            # Boundary in question
+            b = self.z1
+        elif u_z == 0:
+            db = 999999
+        
+
+        if db*self.mu_t < self.s_:
+            #  Photon is moved to the boundary and the step size is updated
+            self.s_ -= db*self.mu_t
+            self.pos[-1] = b # moves the photon to the boundary.
 
     def fresnelReflection(self, n0, n1):
         
@@ -43,11 +74,6 @@ class photons():
         Rsp = ((n0 - n1) / (n0 + n1))**2
 
         self.W += -Rsp
-
-    def stepSize(self):
-        
-        self.s_ = -np.log(self.eta())
-    
 
 
 
@@ -75,10 +101,10 @@ class photons():
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
-            theta = np.arccos(1/2*g)*(1 + g**2 - ((1-g**2)/(1-g+2*g*self.eta()))**2)
+            theta = np.arccos((0.5*g)*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
 
         else:
-            theta = np.arccos(2*self.eta() -1)
+            theta = np.arccos(2*self.eta()-1)
 
         phi = 2*np.pi*self.eta()
 
@@ -86,17 +112,21 @@ class photons():
         u_x, u_y, u_z  = self.vel
 
 
-        if abs(u_z) > 0.9999:
-            u_x = np.sin(theta)*np.cos(phi)
-            u_y = np.sin(theta)*np.sin(phi)
-            u_z = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
+        if abs(u_z) > 0.99999:
+            u_x_new = np.sin(theta)*np.cos(phi)
+            u_y_new = np.sin(theta)*np.sin(phi)
+            u_z_new = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
 
         else:
-            u_x = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + u_z*np.cos(theta)
-            u_y = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + u_y*np.cos(theta)
-            u_z = np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
+            u_x_new = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_x*np.cos(theta))
+            u_y_new = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_y*np.cos(theta))
+            u_z_new = -np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
 
-        self.vel = np.array([u_x, u_y, u_z])
+        self.vel = np.array([u_x_new, u_y_new, u_z_new])
+
+        if abs(u_y) > 1 or abs(u_x) > 1:
+            print (theta, phi, u_x, u_y, u_z, u_x_new, u_y_new, u_z_new)
+
 
     
 
@@ -122,34 +152,23 @@ class photons():
 
 
 
-class mediums():
-
-    def __init__(self, size, refractiveIndex1):
-
-        # For now this is a homogeneous medium 
-        self.n0 = 1
-        self.n1 = refractiveIndex1
-
-
-
-        self.grid = np.zeros([1000,1000,1000])
-        material_z  = np.ones(1000)
 
         
 
 
 
 def run(number):
-
+    
     if number % 100 == 0:
         print (number)
     
-    two_layer = material(l1depth=1, l1n=1, l2depth=1, l2n=2)
-    photon = photons(weight=1)
+    two_layer = medium()
+    photon = photons(two_layer, weight=1)
 
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
        
+        photon.hit_boundary()
         photon.boundary_distance(two_layer.z_array)
         photon.fresnelReflection(two_layer.n0, two_layer.n1)
         photon.stepSize()
@@ -168,9 +187,9 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 10000 # Number of photons
 
-    medium1 = mediums(4, refractiveIndex1=2)
+    
 
     names = ['x','y','z','vx','vy','vz']
     photon_data = np.empty(len(names))
@@ -194,7 +213,7 @@ if __name__ == '__main__':
     print(df.describe())
     
     plt.figure()
-    plt.hist(df['y'], bins=100)
+    plt.hist(df['z'], bins=100)
     plt.show()
 
 
