@@ -61,10 +61,14 @@ class photons():
             db = 999999
         
 
-        if db*self.mu_t < self.s_:
+        if abs(db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= db*self.mu_t
             self.pos[-1] = b # moves the photon to the boundary.
+            return True
+        
+        else:
+            return False
 
     def fresnelReflection(self, n0, n1):
         
@@ -76,18 +80,15 @@ class photons():
         self.W += -Rsp
 
 
-
-    def boundary_distance(self, material):
-        # This to me looks very computationally intensive I think it would be better to move the photon and if 
-        # boundary 
-        pass
-        
-
     def move(self):
         self.pos = self.pos + self.vel*self.s_
+        self.s_ = 0
 
     def reflect(self):
-        pass
+        # specular reflection 
+        alpha_i = np.arcos(abs(self.vel[-1]))
+
+        
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
@@ -124,12 +125,7 @@ class photons():
 
         self.vel = np.array([u_x_new, u_y_new, u_z_new])
 
-        if abs(u_y) > 1 or abs(u_x) > 1:
-            print (theta, phi, u_x, u_y, u_z, u_x_new, u_y_new, u_z_new)
-
-
-    
-
+ 
     def roulette(self):
         # defines the chance that a photon is terminated
         m = 10 
@@ -168,10 +164,10 @@ def run(number):
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
        
-        photon.hit_boundary()
-        photon.boundary_distance(two_layer.z_array)
-        photon.fresnelReflection(two_layer.n0, two_layer.n1)
         photon.stepSize()
+        if photon.hit_boundary():
+            photon.fresnelReflection(two_layer.n0, two_layer.n1)
+        
         photon.move()
         photon.absorb()
         photon.scatter()
