@@ -1,18 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 import multiprocessing as mp
+import pandas as pd
 import time
+
+from material import *
 
 
 np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, weight):
+    def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
-        self.alive = True 
+        self.n0 = medium.n0
+        self.n1 = medium.n1
 
+        self.z0 = 0
+        self.z1 = medium.z1
+
+        self.alive = True 
+        
         self.pos = np.array([0,0,0])
         self.vel = np.array([0,0,1])
 
@@ -30,7 +39,36 @@ class photons():
 
     def eta(self):
         return np.random.random()
+    
+    def stepSize(self):
         
+        self.s_ = -np.log(self.eta())
+        
+    def hit_boundary(self):
+        u_z = self.vel[-1]
+        z = self.pos[-1]
+        
+        # Distance to boundary
+        if u_z < 0:
+            db = (self.z0 - z) / u_z
+            # boundary in question
+            b = self.z0
+        elif u_z > 0:
+            db = (self.z1 - z) / u_z
+            # Boundary in question
+            b = self.z1
+        elif u_z == 0:
+            db = 999999
+        
+
+        if abs(db*self.mu_t) < abs(self.s_):
+            #  Photon is moved to the boundary and the step size is updated
+            self.s_ -= db*self.mu_t
+            self.pos[-1] = b # moves the photon to the boundary.
+            return True
+        
+        else:
+            return False
 
     def fresnelReflection(self, n0, n1):
         
@@ -41,23 +79,16 @@ class photons():
 
         self.W += -Rsp
 
-    def stepSize(self):
-        
-        self.s_ = -np.log(self.eta())
-    
-
-
-
-    def boundary_distance(self):
-        # This to me looks very computationally intensive I think it would be better to move the photon and if 
-        # boundary 
-        pass 
 
     def move(self):
         self.pos = self.pos + self.vel*self.s_
+        self.s_ = 0
 
     def reflect(self):
-        pass
+        # specular reflection 
+        alpha_i = np.arcos(abs(self.vel[-1]))
+
+        
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
@@ -71,10 +102,10 @@ class photons():
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
-            theta = np.arccos(1/2*g)*(1 + g**2 - ((1-g**2)/(1-g+2*g*self.eta()))**2)
+            theta = np.arccos((0.5*g)*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
 
         else:
-            theta = np.arccos(2*self.eta() -1)
+            theta = np.arccos(2*self.eta()-1)
 
         phi = 2*np.pi*self.eta()
 
@@ -82,20 +113,19 @@ class photons():
         u_x, u_y, u_z  = self.vel
 
 
-        if abs(u_z) > 0.9999:
-            u_x = np.sin(theta)*np.cos(phi)
-            u_y = np.sin(theta)*np.sin(phi)
-            u_z = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
+        if abs(u_z) > 0.99999:
+            u_x_new = np.sin(theta)*np.cos(phi)
+            u_y_new = np.sin(theta)*np.sin(phi)
+            u_z_new = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
 
         else:
-            u_x = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + u_z*np.cos(theta)
-            u_y = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + u_y*np.cos(theta)
-            u_z = np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
+            u_x_new = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_x*np.cos(theta))
+            u_y_new = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_y*np.cos(theta))
+            u_z_new = -np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
 
-        self.vel = np.array([u_x, u_y, u_z])
+        self.vel = np.array([u_x_new, u_y_new, u_z_new])
 
-    
-
+ 
     def roulette(self):
         # defines the chance that a photon is terminated
         m = 10 
@@ -118,83 +148,72 @@ class photons():
 
 
 
-class mediums():
-
-    def __init__(self, refractiveIndex):
-
-        # For now this is a homogeneous medium 
-        self.n0 = 1
-        self.n1 = refractiveIndex
 
         
-        self.grid = np.zeros([1000,1000,1000])
 
 
 
-def run(medium):
+def run(number):
     
-    photon = photons(weight=1)
+    if number % 100 == 0:
+        print (number)
     
+    two_layer = medium()
+    photon = photons(two_layer, weight=1)
+
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
-        # Define Photon
-        
-        print (photon.pos)
-        print (photon.W)
-        #print (photon.pos)
-
-        photon.fresnelReflection(medium.n0, medium.n1)
+       
         photon.stepSize()
+        if photon.hit_boundary():
+            photon.fresnelReflection(two_layer.n0, two_layer.n1)
+        
         photon.move()
         photon.absorb()
         photon.scatter()
         photon.roulette()
         
-        print('position:{}, velocity: {}, weight: {}'.format(photon.pos, photon.vel, photon.W))
-            
-
-
-
         
-        # Set step size of photon according to -ln(eta) where eta is a psuedo random number
+    final_pos = np.concatenate((photon.pos, photon.vel))
 
-        # Find Boundary distance or change in medium
-
-
-        # If step > distance to boundary d_b * u_t move to boundary and test for reflect or trasmit otherwise move.
-
-        # If not at boundary - Transmit, Absorb or Scatter
-
-        # photon dead test, i,e absorbed or out of bounds 
-
-        # weight check 
-
-        # Roulette 
-
-        # Repeat if photon is still alive
-
-        # Last Photon? Then End.
-
+    return final_pos
     
-
 
 if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 10000 # Number of photons
 
-    medium1 = mediums(refractiveIndex=2)
+    
 
-    #pool = mp.Pool(processes=n_cpu) 
-    #results = [pool.map(run, range(numberPhotons , medium1))]
+    names = ['x','y','z','vx','vy','vz']
+    photon_data = np.empty(len(names))
 
-    run(medium1)
+    # create and configure the process pool
+    with mp.Pool(processes=n_cpu) as pool:
+        # execute tasks in order
+        for result in pool.map(run, range(numberPhotons)):
+            photon_data = np.vstack([photon_data, result])
 
+    
+    # process pool is closed automatically
 
     t1 = time.time()
     
     print ('parallel time: ', t1 - t0)
+
+    df = pd.DataFrame(data=photon_data, columns=names)
+    df.drop(0, inplace=True)
+    print(df.head())
+    print(df.describe())
+    
+    plt.figure()
+    plt.hist(df['z'], bins=100)
+    plt.show()
+
+
+
 
 
 
