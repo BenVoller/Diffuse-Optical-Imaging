@@ -26,13 +26,11 @@ class photons():
         self.vel = np.array([0,0,1])
 
         # Extinction coefficient
-        self.mu_t = 1
-        self.s_ = 0
-        
         self.mu_a = 0.25
         self.mu_t = 0.75
 
         self.W = weight 
+
 
         # Psuedo Random Number for the step size of the photon movement
         
@@ -53,10 +51,18 @@ class photons():
             db = (self.z0 - z) / u_z
             # boundary in question
             b = self.z0
+
+            # Defines which refactive index is the initial and which is the new 
+            self.ni = self.n1
+            self.nt = self.n0
         elif u_z > 0:
             db = (self.z1 - z) / u_z
             # Boundary in question
             b = self.z1
+
+            self.ni = self.n0
+            self.nt = self.n1
+
         elif u_z == 0:
             db = 999999
         
@@ -84,11 +90,51 @@ class photons():
         self.pos = self.pos + self.vel*self.s_
         self.s_ = 0
 
-    def reflect(self):
+    def Refractive_index(self, pos, vel):
+
+        indices = [0, self.z0, self.z1, 0]
+
+        # Returns a postive or negative number based on the direction of the photon
+        direction = np.sign(self.vel[-1])
+
+        self.ni = indices[direction]
+        self.nt  = indices[-direction]
+
+
+
+        # Finds the refractive index of the initial layer and that of the new layer
+
+    def transmission(self):
         # specular reflection 
         alpha_i = np.arcos(abs(self.vel[-1]))
 
+        # Gathers the refractive indices for the iniital and new medium
+        self.Refractive_index
+
+        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+
+        # Check if the photon is reflected if alpha_i is greater than the critical angle
+
+        if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
+            Ri = 1
+
+        else: 
+            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+            # be randomly polarised
+            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+
+        # Now check is the photon packet is reflected or transmitted. 
+        if self.eta() <= Ri:
+            # Reverses the z direction of the photon packet.
+            self.vel[-1] = -self.vel[-1]
+
+        else: 
+            pass
+
         
+
+
+
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
@@ -163,9 +209,10 @@ def run(number):
 
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
-       
+        print (photon.pos, photon.vel)
         photon.stepSize()
         if photon.hit_boundary():
+            print (photon.pos, photon.vel)
             photon.fresnelReflection(two_layer.n0, two_layer.n1)
         
         photon.move()
@@ -183,7 +230,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
+    numberPhotons = 1 # Number of photons
 
     
 
