@@ -16,8 +16,9 @@ class photons():
 
         self.n0 = medium.n0
         self.n1 = medium.n1
+        self.n2 = medium.n2
 
-        self.z0 = 0
+        self.z0 = 1
         self.z1 = medium.z1
 
         self.alive = True 
@@ -31,46 +32,111 @@ class photons():
 
         self.W = weight 
 
+        # These are the refractive indices and the current one is set to the first in the array 
+        self.indices = medium.layers
+        self.n_current = self.indices[0]
+        self.layer_no = 0 # Defines which layer we are starting in
+
+        self.distances = medium.distances
+        self.z_current = self.distances[0] 
+     
+
+
 
         # Psuedo Random Number for the step size of the photon movement
-        
-
     def eta(self):
         return np.random.random()
+    
     
     def stepSize(self):
         
         self.s_ = -np.log(self.eta())
+
+
+    def Refractive_index(self):
+
+        # Returns a postive or negative number based on the direction of the photon
+        direction = np.sign(self.vel[-1])
+        z = self.pos[-1]
+
+        # Sets the next boundary to psuedo infinity
+        if direction ==0: 
+            db = 99999999
+
+        if z < self.distances[0]: 
+            pass
+        elif z < self.distances[1]:
+            # current refractive index
+            ni = self.indices[1]
+
+            if direction == 1:
+                # Distance to next layer, next refractive index
+                zt = self.distances[1]
+                nt = self.indices[2]
+
+            elif direction == -1:
+                zt = self.distances[0]
+                nt = self.indices[0]
+
+
+        elif z < self.distances[2]: 
+            # current refractive index
+            ni = self.indices[2]
+
+            if direction == 1:
+                # Distance to next layer, next refractive index
+                zt = self.distances[2]
+                nt = self.indices[3]
+
+            elif direction == -1:
+                zt = self.distances[1]
+                nt = self.indices[1]
+
+
+        db = (zt - z) / self.vel[-1]
+        # Returns the current refractive layer and then the next layer which the photon is incident upon 
+        self.ni = ni    #current n
+        self.nt  = nt   # new n of next layer
+        self.db = db    # distance to boundary 
+        self.zt = zt    # depth of next boundary
+
         
     def hit_boundary(self):
         u_z = self.vel[-1]
         z = self.pos[-1]
-        
+
+        print ('pos', self.pos, 'vel', self.vel, self.layer_no) 
         # Distance to boundary
         if u_z < 0:
-            db = (self.z0 - z) / u_z
+
+            # This sets the layer above the current one to be z0
+            z0 = self.distances[self.layer_no - 1]
+
+            db = (z0 - z) / u_z
             # boundary in question
-            b = self.z0
+            b = z0
+
 
             # Defines which refactive index is the initial and which is the new 
-            self.ni = self.n1
-            self.nt = self.n0
+    
         elif u_z > 0:
-            db = (self.z1 - z) / u_z
-            # Boundary in question
-            b = self.z1
 
-            self.ni = self.n0
-            self.nt = self.n1
+            z1 = self.distances[self.layer_no + 1]
+            
+            db = (z1 - z) / u_z
+            # Boundary in question
+            b = z1
 
         elif u_z == 0:
             db = 999999
         
 
-        if abs(db*self.mu_t) < abs(self.s_):
+        if abs(self.db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= db*self.mu_t
+            self.layer_no += np.sign(self.vel[-1])
             self.pos[-1] = b # moves the photon to the boundary.
+            
             return True
         
         else:
@@ -83,6 +149,7 @@ class photons():
 
         Rsp = ((n0 - n1) / (n0 + n1))**2
 
+
         self.W += -Rsp
 
 
@@ -90,26 +157,16 @@ class photons():
         self.pos = self.pos + self.vel*self.s_
         self.s_ = 0
 
-    def Refractive_index(self, pos, vel):
-
-        indices = [0, self.z0, self.z1, 0]
-
-        # Returns a postive or negative number based on the direction of the photon
-        direction = np.sign(self.vel[-1])
-
-        self.ni = indices[direction]
-        self.nt  = indices[-direction]
-
-
-
+    
         # Finds the refractive index of the initial layer and that of the new layer
 
     def transmission(self):
         # specular reflection 
-        alpha_i = np.arcos(abs(self.vel[-1]))
+        alpha_i = np.arccos(abs(self.vel[-1]))
 
         # Gathers the refractive indices for the iniital and new medium
-        self.Refractive_index
+        self.Refractive_index()
+
 
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
@@ -129,12 +186,22 @@ class photons():
             self.vel[-1] = -self.vel[-1]
 
         else: 
+            u_x = self.vel[1] * self.ni / self.nt
+            u_y = self.vel[2] * self.ni / self.nt
+            u_z = np.sign(self.vel[-1]) * np.cos(alpha_t)
+
+            self.vel = [u_x, u_y, u_z]
+
+        if self.nt == 0:
+
             pass
+            
 
         
 
 
-
+    def exiting_media(self):
+        return True
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
@@ -209,11 +276,13 @@ def run(number):
 
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
-        print (photon.pos, photon.vel)
         photon.stepSize()
+        photon.Refractive_index()
         if photon.hit_boundary():
-            print (photon.pos, photon.vel)
             photon.fresnelReflection(two_layer.n0, two_layer.n1)
+            photon.transmission()
+            if photon.exiting_media():
+                break
         
         photon.move()
         photon.absorb()
@@ -230,19 +299,24 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1 # Number of photons
+    numberPhotons = 5000 # Number of photons
 
     
 
     names = ['x','y','z','vx','vy','vz']
     photon_data = np.empty(len(names))
 
+    for i in range(numberPhotons):
+        photon_data = np.vstack([photon_data,run(i)])
+        
+
+    '''
     # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
-
+    '''
     
     # process pool is closed automatically
 
