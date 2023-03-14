@@ -69,15 +69,22 @@ class photons():
             # current refractive index
             ni = self.indices[1]
 
+            print ('HERE')
+
             if direction == 1:
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
                 nt = self.indices[2]
 
+                print ('Down')
+
             elif direction == -1:
                 zt = self.distances[0]
                 nt = self.indices[0]
 
+                print ('Up')
+
+                
 
         elif z < self.distances[2]: 
             # current refractive index
@@ -104,6 +111,7 @@ class photons():
     def hit_boundary(self):
         u_z = self.vel[-1]
         z = self.pos[-1]
+        '''
 
         print ('pos', self.pos, 'vel', self.vel, self.layer_no) 
         # Distance to boundary
@@ -129,13 +137,13 @@ class photons():
 
         elif u_z == 0:
             db = 999999
-        
+        '''
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
-            self.s_ -= db*self.mu_t
+            self.s_ -= self.db*self.mu_t
             self.layer_no += np.sign(self.vel[-1])
-            self.pos[-1] = b # moves the photon to the boundary.
+            self.pos[-1] = self.zt # moves the photon to the boundary.
             
             return True
         
@@ -279,6 +287,7 @@ def run(number):
         photon.stepSize()
         photon.Refractive_index()
         if photon.hit_boundary():
+            print ('Hit boundary', photon.zt)
             photon.fresnelReflection(two_layer.n0, two_layer.n1)
             photon.transmission()
             if photon.exiting_media():
