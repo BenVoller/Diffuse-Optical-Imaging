@@ -14,9 +14,9 @@ class photons():
     def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
-        self.n0 = medium.n0
-        self.n1 = medium.n1
-        self.n2 = medium.n2
+        #self.n0 = medium.n0
+        #self.n1 = medium.n1
+        #self.n2 = medium.n2
 
         self.z0 = 1
         self.z1 = medium.z1
@@ -39,6 +39,10 @@ class photons():
 
         self.distances = medium.distances
         self.z_current = self.distances[0] 
+
+
+        self.ni = 1
+        self.nt = self.n_current
      
 
 
@@ -58,36 +62,36 @@ class photons():
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
-
+        print ('Start')
         # Sets the next boundary to psuedo infinity
         if direction ==0: 
             db = 99999999
 
         if z < self.distances[0]: 
+            
             pass
+
         elif z < self.distances[1]:
             # current refractive index
             ni = self.indices[1]
 
-            print ('HERE')
+            
 
             if direction == 1:
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
+                
                 nt = self.indices[2]
 
-                print ('Down')
-
+                
             elif direction == -1:
                 zt = self.distances[0]
                 nt = self.indices[0]
-
-                print ('Up')
-
-                
+ 
 
         elif z < self.distances[2]: 
             # current refractive index
+            
             ni = self.indices[2]
 
             if direction == 1:
@@ -99,6 +103,11 @@ class photons():
                 zt = self.distances[1]
                 nt = self.indices[1]
 
+        print('direction', direction)
+        print ('velocity', self.vel)
+        print ('position', self.pos)
+        print ('ni', self.ni)
+        print ('nt', self.nt)
 
         db = (zt - z) / self.vel[-1]
         # Returns the current refractive layer and then the next layer which the photon is incident upon 
@@ -109,35 +118,7 @@ class photons():
 
         
     def hit_boundary(self):
-        u_z = self.vel[-1]
-        z = self.pos[-1]
-        '''
-
-        print ('pos', self.pos, 'vel', self.vel, self.layer_no) 
-        # Distance to boundary
-        if u_z < 0:
-
-            # This sets the layer above the current one to be z0
-            z0 = self.distances[self.layer_no - 1]
-
-            db = (z0 - z) / u_z
-            # boundary in question
-            b = z0
-
-
-            # Defines which refactive index is the initial and which is the new 
-    
-        elif u_z > 0:
-
-            z1 = self.distances[self.layer_no + 1]
-            
-            db = (z1 - z) / u_z
-            # Boundary in question
-            b = z1
-
-        elif u_z == 0:
-            db = 999999
-        '''
+        
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
@@ -162,6 +143,7 @@ class photons():
 
 
     def move(self):
+        
         self.pos = self.pos + self.vel*self.s_
         self.s_ = 0
 
@@ -173,9 +155,7 @@ class photons():
         alpha_i = np.arccos(abs(self.vel[-1]))
 
         # Gathers the refractive indices for the iniital and new medium
-        self.Refractive_index()
-
-
+        
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
         # Check if the photon is reflected if alpha_i is greater than the critical angle
@@ -192,13 +172,14 @@ class photons():
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
+            
 
         else: 
             u_x = self.vel[1] * self.ni / self.nt
             u_y = self.vel[2] * self.ni / self.nt
             u_z = np.sign(self.vel[-1]) * np.cos(alpha_t)
 
-            self.vel = [u_x, u_y, u_z]
+            self.vel = np.array([u_x, u_y, u_z])
 
         if self.nt == 0:
 
@@ -259,6 +240,7 @@ class photons():
             else:
                 self.W = 0
                 self.alive = False
+                print ('dead')
 
 
 
@@ -288,10 +270,10 @@ def run(number):
         photon.Refractive_index()
         if photon.hit_boundary():
             print ('Hit boundary', photon.zt)
-            photon.fresnelReflection(two_layer.n0, two_layer.n1)
+            #photon.fresnelReflection(two_layer.n0, two_layer.n1)
             photon.transmission()
-            if photon.exiting_media():
-                break
+            #if photon.exiting_media():
+                #break
         
         photon.move()
         photon.absorb()
@@ -308,7 +290,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 5000 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
     
 
