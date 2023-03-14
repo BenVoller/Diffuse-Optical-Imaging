@@ -38,7 +38,7 @@ class photons():
         self.layer_no = 0 # Defines which layer we are starting in
 
         self.distances = medium.distances
-        self.z_current = self.distances[0] 
+        self.z_current = self.distances[1] 
 
 
         self.ni = 1
@@ -55,6 +55,7 @@ class photons():
     def stepSize(self):
         
         self.s_ = -np.log(self.eta())
+        print (self.s_)
 
 
     def Refractive_index(self):
@@ -64,7 +65,7 @@ class photons():
         z = self.pos[-1]
         print ('Start')
         # Sets the next boundary to psuedo infinity
-        if direction ==0: 
+        if direction == 0: 
             db = 99999999
 
         if z < self.distances[0]: 
@@ -78,6 +79,7 @@ class photons():
             
 
             if direction == 1:
+                
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
                 
@@ -119,13 +121,18 @@ class photons():
         
     def hit_boundary(self):
         
+        # Calls the Refractive index function to find the position and location of the next boundary
+        self.Refractive_index()
+        
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
-            self.layer_no += np.sign(self.vel[-1])
+            #self.layer_no += np.sign(self.vel[-1])
             self.pos[-1] = self.zt # moves the photon to the boundary.
             
+            print ('boundary', self.pos)
+            print (self.s_)
             return True
         
         else:
@@ -267,8 +274,8 @@ def run(number):
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
         photon.stepSize()
-        photon.Refractive_index()
-        if photon.hit_boundary():
+        # Refractive index called within hit boundary
+        while photon.hit_boundary():
             print ('Hit boundary', photon.zt)
             #photon.fresnelReflection(two_layer.n0, two_layer.n1)
             photon.transmission()
@@ -279,6 +286,7 @@ def run(number):
         photon.absorb()
         photon.scatter()
         photon.roulette()
+        print ('End of single run')
         
         
     final_pos = np.concatenate((photon.pos, photon.vel))
