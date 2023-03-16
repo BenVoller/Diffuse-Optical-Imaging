@@ -14,9 +14,8 @@ class photons():
     def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
-        #self.n0 = medium.n0
-        #self.n1 = medium.n1
-        #self.n2 = medium.n2
+        self.reflectance = np.empty(4)
+        self.transmittance = np.empty(4)
 
         self.z0 = 1
         self.z1 = medium.z1
@@ -40,6 +39,7 @@ class photons():
         self.distances = medium.distances
         self.z_current = self.distances[1] 
 
+        self.upper_bound = self.distances[2]
 
         self.ni = 1
         self.nt = self.n_current
@@ -55,7 +55,6 @@ class photons():
     def stepSize(self):
         
         self.s_ = -np.log(self.eta())
-        print (self.s_)
 
 
     def Refractive_index(self):
@@ -63,7 +62,7 @@ class photons():
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
-        print ('Start')
+        
         # Sets the next boundary to psuedo infinity
         if direction == 0: 
             db = 99999999
@@ -75,24 +74,37 @@ class photons():
         elif z < self.distances[1]:
             # current refractive index
             ni = self.indices[1]
-
             
-
+        
             if direction == 1:
+                
                 
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
                 
                 nt = self.indices[2]
+                
 
                 
             elif direction == -1:
                 zt = self.distances[0]
                 nt = self.indices[0]
- 
+
+        elif z == self.distances[1]: 
+            
+            if direction == 1:
+                ni = self.indices[2]
+                nt = self.indices[3]
+                zt = self.distances[2]
+
+            elif direction == -1:
+                 ni = self.indices[1]
+                 nt = self.indices[0]
+                 zt = self.distances[0]
 
         elif z < self.distances[2]: 
             # current refractive index
+            
             
             ni = self.indices[2]
 
@@ -105,12 +117,19 @@ class photons():
                 zt = self.distances[1]
                 nt = self.indices[1]
 
-        print('direction', direction)
-        print ('velocity', self.vel)
-        print ('position', self.pos)
-        print ('ni', self.ni)
-        print ('nt', self.nt)
+        elif z == self.distances[2]:
 
+            ni = self.indices[2]
+
+            if direction == 1:
+                zt = self.distances[3]
+                nt = self.indices[3]
+
+            if direction == -1: 
+                zt = self.distances[1]
+                nt = self.indices[1]
+
+    
         db = (zt - z) / self.vel[-1]
         # Returns the current refractive layer and then the next layer which the photon is incident upon 
         self.ni = ni    #current n
@@ -122,8 +141,6 @@ class photons():
     def hit_boundary(self):
         
         # Calls the Refractive index function to find the position and location of the next boundary
-        self.Refractive_index()
-        
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             #  Photon is moved to the boundary and the step size is updated
@@ -131,8 +148,8 @@ class photons():
             #self.layer_no += np.sign(self.vel[-1])
             self.pos[-1] = self.zt # moves the photon to the boundary.
             
-            print ('boundary', self.pos)
-            print (self.s_)
+    
+           
             return True
         
         else:
@@ -180,24 +197,47 @@ class photons():
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
             
+            
 
-        else: 
-            u_x = self.vel[1] * self.ni / self.nt
-            u_y = self.vel[2] * self.ni / self.nt
+        elif self.nt == 1: # i.e the photon is leaving the material.
+            # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
+            
+            self.photon_exit()
+            
+        else:
+            # The photon is refracted according to Snells Law
+            u_x = self.vel[0] * self.ni / self.nt
+            u_y = self.vel[1] * self.ni / self.nt
             u_z = np.sign(self.vel[-1]) * np.cos(alpha_t)
 
             self.vel = np.array([u_x, u_y, u_z])
+            
 
-        if self.nt == 0:
-
-            pass
             
 
         
 
+    def photon_exit(self):
+        #print('exiting')
+        exit_data = np.hstack([self.pos, self.W])
+        #print(exit_data)
 
-    def exiting_media(self):
-        return True
+        if self.pos[-1] == 0:
+            
+            self.reflectance = np.vstack([self.reflectance, exit_data])
+            #print('reflection', self.reflectance)
+
+        if self.pos[-1] == self.upper_bound:
+            
+            self.transmittance = np.vstack([self.transmittance, exit_data])
+            #print('transmittance', self.transmittance)
+
+        self.W = 0 
+
+        # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
+        self.alive = False    
+
+
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
@@ -208,6 +248,8 @@ class photons():
         self.W -= delW
 
     def scatter(self):
+
+        
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
@@ -217,7 +259,7 @@ class photons():
             theta = np.arccos(2*self.eta()-1)
 
         phi = 2*np.pi*self.eta()
-
+        
         # Now define new velocity angles 
         u_x, u_y, u_z  = self.vel
 
@@ -226,13 +268,18 @@ class photons():
             u_x_new = np.sin(theta)*np.cos(phi)
             u_y_new = np.sin(theta)*np.sin(phi)
             u_z_new = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
+            
+
+    
 
         else:
+            
             u_x_new = (np.sin(theta)*(u_x*u_z*np.cos(phi) - u_y*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_x*np.cos(theta))
             u_y_new = (np.sin(theta)*(u_y*u_z*np.cos(phi) + u_x*np.sin(phi)))/np.sqrt(1-u_z**2) + (u_y*np.cos(theta))
             u_z_new = -np.sqrt(1-u_z**2)*(np.sin(theta)*np.cos(phi)) + u_z*np.cos(theta)
-
+            
         self.vel = np.array([u_x_new, u_y_new, u_z_new])
+        
 
  
     def roulette(self):
@@ -247,7 +294,7 @@ class photons():
             else:
                 self.W = 0
                 self.alive = False
-                print ('dead')
+                
 
 
 
@@ -259,10 +306,6 @@ class photons():
 
 
 
-        
-
-
-
 def run(number):
     
     if number % 100 == 0:
@@ -270,15 +313,24 @@ def run(number):
     
     two_layer = medium()
     photon = photons(two_layer, weight=1)
+    
 
     # Runs the photon trasnport for Monte Carlo photon trasnport 
     while photon.alive:
+        
         photon.stepSize()
-        # Refractive index called within hit boundary
+        photon.Refractive_index()
+
         while photon.hit_boundary():
-            print ('Hit boundary', photon.zt)
+            
+            #time.sleep(1)
             #photon.fresnelReflection(two_layer.n0, two_layer.n1)
             photon.transmission()
+            photon.Refractive_index()
+            
+            if photon.W == 0:
+                break
+            # 
             #if photon.exiting_media():
                 #break
         
@@ -286,10 +338,10 @@ def run(number):
         photon.absorb()
         photon.scatter()
         photon.roulette()
-        print ('End of single run')
-        
+       
         
     final_pos = np.concatenate((photon.pos, photon.vel))
+    
 
     return final_pos
     
@@ -300,15 +352,12 @@ if __name__ == '__main__':
     n_cpu = mp.cpu_count()  # = 8 
     numberPhotons = 1000 # Number of photons
 
-    
-
     names = ['x','y','z','vx','vy','vz']
     photon_data = np.empty(len(names))
 
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data,run(i)])
-        
-
+    
     '''
     # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
@@ -327,6 +376,8 @@ if __name__ == '__main__':
     df.drop(0, inplace=True)
     print(df.head())
     print(df.describe())
+    
+    
     
     plt.figure()
     plt.hist(df['z'], bins=100)
