@@ -26,7 +26,7 @@ def run(number):
             photon.Refractive_index()
             
         if photon.W == 0:
-            break 
+            break
             
         photon.move()
         photon.absorb()

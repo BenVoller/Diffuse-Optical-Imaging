@@ -16,9 +16,10 @@ class photons():
 
         # These will record the values used to analyse the validity of the solver
         # Will soon need to also include wavelength.
-        self.reflectance = np.empty(4)      # Photons returning out 0 boundary
-        self.transmittance = np.empty(4)    # Photons leaving final boundary 
-        self.unscattered = np.empty(4)      # Photons leaving final boundary without being scattered.
+        self.reflectance = np.empty(4)          # Photons returning out 0 boundary
+        self.transmittance = np.empty(4)        # Photons leaving final boundary 
+        self.unsc_reflectance = np.empty(4)     # Photons leaving 0 boundary without being scattered.
+        self.unsc_transmittance = np.empty(4)   # Photons leaving final boundary without being scattered
 
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
@@ -228,18 +229,20 @@ class photons():
         exit_data = np.hstack([self.pos, self.W])
         #print(exit_data)
 
-        if self.pos[-1] == 0:
-            
+        if self.pos[-1] == 0 and self.is_scattered == False:
+            self.unsc_reflectance = np.vstack([self.unsc_reflectance, exit_data])
+
+
+        elif self.pos[-1] == 0 and self.is_scattered == True:   
             self.reflectance = np.vstack([self.reflectance, exit_data])
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and self.is_scattered == False:
-            print ('unscattered')
-            self.unscattered = np.vstack([self.unscattered, exit_data])
+            self.unsc_transmittance = np.vstack([self.unsc_transmittance, exit_data])
 
 
         elif self.pos[-1] == self.upper_bound and self.is_scattered == True:
-            
+
             self.transmittance = np.vstack([self.transmittance, exit_data])
             #print('transmittance', self.transmittance)
 
@@ -314,91 +317,6 @@ class photons():
     def photon_dead(self):
         # Currently the only mechanism for photon termination is roulette, include boundaries soon.
         pass
-
-
-
-
-
-def run(number):
-    
-    if number % 100 == 0:
-        print (number)
-    
-    two_layer = medium()
-    photon = photons(two_layer, weight=1)
-    
-
-    # Runs the photon trasnport for Monte Carlo photon trasnport 
-    while photon.alive:
-        
-        photon.stepSize()
-        photon.Refractive_index()
-
-        while photon.hit_boundary():
-            
-            #time.sleep(1)
-            #photon.fresnelReflection(two_layer.n0, two_layer.n1)
-            photon.transmission()
-            photon.Refractive_index()
-            
-        if photon.W == 0:
-            break 
-            
-    
-        
-        photon.move()
-        photon.absorb()
-        photon.scatter()
-        photon.roulette()
-       
-        
-    final_pos = np.concatenate((photon.pos, photon.vel))
-    
-    
-
-    return final_pos
-    
-
-if __name__ == '__main__':
-    t0 = time.time()
-
-    n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
-
-    names = ['x','y','z','vx','vy','vz']
-    photon_data = np.empty(len(names))
-
-    '''
-    # Linear computation for bugfixing
-    for i in range(numberPhotons):
-        photon_data = np.vstack([photon_data,run(i)])
-    '''
-    #'''
-    # create and configure the process pool
-    with mp.Pool(processes=n_cpu) as pool:
-        # execute tasks in order
-        for result in pool.map(run, range(numberPhotons)):
-            photon_data = np.vstack([photon_data, result])
-    #'''
-    
-    # process pool is closed automatically
-
-    t1 = time.time()
-    
-    print ('parallel time: ', t1 - t0)
-
-    df = pd.DataFrame(data=photon_data, columns=names)
-    df.drop(0, inplace=True)
-    print(df.head())
-    print(df.describe())
-    
-    
-    
-    plt.figure()
-    plt.hist(df['z'], bins=100)
-    plt.show()
-
-
 
 
 
