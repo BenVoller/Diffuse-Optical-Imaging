@@ -247,6 +247,8 @@ class photons():
 
         self.W -= delW
 
+
+
     def scatter(self):
 
         
@@ -270,7 +272,6 @@ class photons():
             u_z_new = np.sign(u_z)*np.cos(theta) # Sgn function returns one when the u_z is positive and -1 when negative
             
 
-    
 
         else:
             
@@ -328,11 +329,9 @@ def run(number):
             photon.transmission()
             photon.Refractive_index()
             
-            if photon.W == 0:
-                break
-            # 
-            #if photon.exiting_media():
-                #break
+        if photon.W == 0:
+            break
+    
         
         photon.move()
         photon.absorb()
@@ -342,6 +341,7 @@ def run(number):
         
     final_pos = np.concatenate((photon.pos, photon.vel))
     
+    print (number)
 
     return final_pos
     
@@ -350,23 +350,23 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 10000 # Number of photons
 
     names = ['x','y','z','vx','vy','vz']
     photon_data = np.empty(len(names))
 
-    
+    '''
     # Linear computation for bugfixing
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data,run(i)])
-    
     '''
+    #'''
     # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
-    '''
+    #'''
     
     # process pool is closed automatically
 
