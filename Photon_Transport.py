@@ -355,6 +355,8 @@ if __name__ == '__main__':
     names = ['x','y','z','vx','vy','vz']
     photon_data = np.empty(len(names))
 
+    
+    # Linear computation for bugfixing
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data,run(i)])
     
