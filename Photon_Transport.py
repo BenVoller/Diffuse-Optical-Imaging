@@ -14,8 +14,14 @@ class photons():
     def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
-        self.reflectance = np.empty(4)
-        self.transmittance = np.empty(4)
+        # These will record the values used to analyse the validity of the solver
+        # Will soon need to also include wavelength.
+        self.reflectance = np.empty(4)      # Photons returning out 0 boundary
+        self.transmittance = np.empty(4)    # Photons leaving final boundary 
+        self.unscattered = np.empty(4)      # Photons leaving final boundary without being scattered.
+
+        # Will trigger once one none boundary scattering event occurs
+        self.is_scattered = False
 
         self.z0 = 1
         self.z1 = medium.z1
@@ -227,7 +233,12 @@ class photons():
             self.reflectance = np.vstack([self.reflectance, exit_data])
             #print('reflection', self.reflectance)
 
-        if self.pos[-1] == self.upper_bound:
+        elif self.pos[-1] == self.upper_bound and self.is_scattered == False:
+            print ('unscattered')
+            self.unscattered = np.vstack([self.unscattered, exit_data])
+
+
+        elif self.pos[-1] == self.upper_bound and self.is_scattered == True:
             
             self.transmittance = np.vstack([self.transmittance, exit_data])
             #print('transmittance', self.transmittance)
@@ -251,6 +262,7 @@ class photons():
 
     def scatter(self):
 
+        self.is_scattered = True
         
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
@@ -330,7 +342,8 @@ def run(number):
             photon.Refractive_index()
             
         if photon.W == 0:
-            break
+            break 
+            
     
         
         photon.move()
@@ -341,7 +354,7 @@ def run(number):
         
     final_pos = np.concatenate((photon.pos, photon.vel))
     
-    print (number)
+    
 
     return final_pos
     
