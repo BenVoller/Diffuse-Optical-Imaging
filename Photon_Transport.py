@@ -226,26 +226,26 @@ class photons():
 
     def photon_exit(self):
         #print('exiting')
-        exit_data = np.hstack([self.pos, self.W])
+        #exit_data = np.hstack([self.pos, self.W])
         #print(exit_data)
 
-        if self.pos[-1] == 0 and self.is_scattered == False:
-            self.unsc_reflectance = np.vstack([self.unsc_reflectance, exit_data])
+        if self.pos[-1] == 0 and not self.is_scattered:
+            exit_type = 'Ru'
 
 
-        elif self.pos[-1] == 0 and self.is_scattered == True:   
-            self.reflectance = np.vstack([self.reflectance, exit_data])
+        elif self.pos[-1] == 0 and self.is_scattered:   
+            exit_type = 'Rd'
             #print('reflection', self.reflectance)
 
-        elif self.pos[-1] == self.upper_bound and self.is_scattered == False:
-            self.unsc_transmittance = np.vstack([self.unsc_transmittance, exit_data])
+        elif self.pos[-1] == self.upper_bound and not self.is_scattered:
+            exit_type = 'Tu'
 
 
-        elif self.pos[-1] == self.upper_bound and self.is_scattered == True:
-
-            self.transmittance = np.vstack([self.transmittance, exit_data])
+        elif self.pos[-1] == self.upper_bound and self.is_scattered:
+            exit_type = 'Td'
             #print('transmittance', self.transmittance)
 
+        self.final = np.hstack([self.pos, self.W, exit_type])
         self.W = 0 
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
@@ -308,6 +308,7 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
+                self.final = np.hstack([self.pos, self.W, 'Ab'])
                 self.W = 0
                 self.alive = False
                 

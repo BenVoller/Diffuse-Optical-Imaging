@@ -26,7 +26,8 @@ def run(number):
             photon.Refractive_index()
             
         if photon.W == 0:
-            break
+            
+            return photon.final
             
         photon.move()
         photon.absorb()
@@ -34,34 +35,34 @@ def run(number):
         photon.roulette()
        
         
-    final_pos = np.concatenate((photon.pos, photon.vel))
+    #final_pos = np.concatenate((photon.pos, photon.vel))
     
     
-
-    return final_pos
+    
+    return photon.final
     
 
 if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
-    names = ['x','y','z','vx','vy','vz']
+    names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
 
     '''
     # Linear computation for bugfixing
     for i in range(numberPhotons):
-        photon_data = np.vstack([photon_data,run(i)])
+        photon_data = np.vstack([photon_data, run(i)])
     '''
-    #'''
+    
     # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
-    #'''
+    
     
     # process pool is closed automatically
 
@@ -75,11 +76,18 @@ if __name__ == '__main__':
     print(df.describe())
     
     
-    
+    #%%
+
+    x = np.linspace(0,40,100)
+
+    z_pos = df['z']
+    print (z_pos)
     plt.figure()
-    plt.hist(df['z'], bins=100)
-    plt.show()
+    ax = df.plot.hist(column=["z"], bins=100, figsize=(10, 8))
+    ax.show()
 
 
 
 
+
+# %%
