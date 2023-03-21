@@ -139,10 +139,10 @@ class photons():
     
         db = (zt - z) / self.vel[-1]
         # Returns the current refractive layer and then the next layer which the photon is incident upon 
-        self.ni = ni    #current n
-        self.nt  = nt   # new n of next layer
+        self.ni = ni   #current n
+        self.nt = nt   # new n of next layer
         self.db = db    # distance to boundary 
-        self.zt = zt    # depth of next boundary
+        self.zt = zt  # depth of next boundary
 
         
     def hit_boundary(self):
@@ -155,8 +155,6 @@ class photons():
             #self.layer_no += np.sign(self.vel[-1])
             self.pos[-1] = self.zt # moves the photon to the boundary.
             
-    
-           
             return True
         
         else:
@@ -213,9 +211,9 @@ class photons():
             
         else:
             # The photon is refracted according to Snells Law
-            u_x = self.vel[0] * self.ni / self.nt
-            u_y = self.vel[1] * self.ni / self.nt
-            u_z = np.sign(self.vel[-1]) * np.cos(alpha_t)
+            u_x = np.float(self.vel[0] * self.ni / self.nt)
+            u_y = np.float(self.vel[1] * self.ni / self.nt)
+            u_z = np.float(np.sign(self.vel[-1]) * np.cos(alpha_t))
 
             self.vel = np.array([u_x, u_y, u_z])
             
@@ -230,22 +228,26 @@ class photons():
         #print(exit_data)
 
         if self.pos[-1] == 0 and not self.is_scattered:
-            exit_type = 'Ru'
+            exit_type = 1 #Tu
+            print ('Here')
 
 
         elif self.pos[-1] == 0 and self.is_scattered:   
-            exit_type = 'Rd'
+            exit_type = 2 # Rd'
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            exit_type = 'Tu'
+            exit_type = 3, # Tu
+            
 
 
         elif self.pos[-1] == self.upper_bound and self.is_scattered:
-            exit_type = 'Td'
+            exit_type = 4 # Td
             #print('transmittance', self.transmittance)
-
-        self.final = np.hstack([self.pos, self.W, exit_type])
+        
+        self.pos.astype(float)
+        self.W = np.float(self.W)
+        self.final = np.hstack((self.pos, self.W, exit_type))
         self.W = 0 
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
@@ -308,7 +310,7 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
-                self.final = np.hstack([self.pos, self.W, 'Ab'])
+                self.final = np.hstack([self.pos, self.W, 5]) # 4 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 

@@ -1,5 +1,6 @@
 from material import *
 from Photon_Transport import *
+import seaborn as sns
 np.random.seed(1234)
 
 
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 10000 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
@@ -71,23 +72,29 @@ if __name__ == '__main__':
     print ('parallel time: ', t1 - t0)
 
     df = pd.DataFrame(data=photon_data, columns=names)
+    df['type'] = df['type'].astype(int)
     df.drop(0, inplace=True)
-    print(df.head())
+    #df.drop(columns=0, inplace=True)
+    print(df.head(20))
+    #print(df.info())
     print(df.describe())
+
+    # Separates the unscattered trnasmission from the model. Tu:0, td:1, Ru:2, Rd:3, Ab:4
     
+
+
+   
+    z = df['z']
+    plt.hist(z, bins=100)
+    plt.show()
     
-    #%%
-
-    x = np.linspace(0,40,100)
-
-    z_pos = df['z']
-    print (z_pos)
-    plt.figure()
-    ax = df.plot.hist(column=["z"], bins=100, figsize=(10, 8))
-    ax.show()
+ 
+    
 
 
 
 
 
-# %%
+
+
+

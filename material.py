@@ -2,7 +2,7 @@ import numpy as np
 
 class medium():
 
-    def __init__(self, n1=2, z1=2, n2=4, z2=4):
+    def __init__(self, n1=2.0, z1=2.0, n2=4.0, z2=4.0):
 
         self.size = z1 + z2
         # refractive indexes
@@ -26,7 +26,7 @@ class medium():
                        3:99999}
 
 
-        self.z_array = np.ones(1000*self.size)
+     
 
     
     
