@@ -47,23 +47,23 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
 
-    '''
+    
     # Linear computation for bugfixing
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data, run(i)])
+
     '''
-    
     # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
-    
+    '''
     
     # process pool is closed automatically
 
@@ -82,10 +82,11 @@ if __name__ == '__main__':
     # Separates the unscattered trnasmission from the model. Tu:0, td:1, Ru:2, Rd:3, Ab:4
     
 
-
+    # Create a new column r that denotes the combined XY distance of the photons
+    df['r'] = np.sqrt (df['x']**2 + df['y']**2)
    
-    z = df['z']
-    plt.hist(z, bins=100)
+    print (df.head())
+    plt.hist(df['z'], bins=100)
     plt.show()
     
  
