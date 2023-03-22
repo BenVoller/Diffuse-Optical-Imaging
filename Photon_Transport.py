@@ -14,8 +14,15 @@ class photons():
     def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
-        self.reflectance = np.empty(4)
-        self.transmittance = np.empty(4)
+        # These will record the values used to analyse the validity of the solver
+        # Will soon need to also include wavelength.
+        self.reflectance = np.empty(4)          # Photons returning out 0 boundary
+        self.transmittance = np.empty(4)        # Photons leaving final boundary 
+        self.unsc_reflectance = np.empty(4)     # Photons leaving 0 boundary without being scattered.
+        self.unsc_transmittance = np.empty(4)   # Photons leaving final boundary without being scattered
+
+        # Will trigger once one none boundary scattering event occurs
+        self.is_scattered = False
 
         self.z0 = 1
         self.z1 = medium.z1
@@ -132,10 +139,10 @@ class photons():
     
         db = (zt - z) / self.vel[-1]
         # Returns the current refractive layer and then the next layer which the photon is incident upon 
-        self.ni = ni    #current n
-        self.nt  = nt   # new n of next layer
+        self.ni = ni   #current n
+        self.nt = nt   # new n of next layer
         self.db = db    # distance to boundary 
-        self.zt = zt    # depth of next boundary
+        self.zt = zt  # depth of next boundary
 
         
     def hit_boundary(self):
@@ -148,8 +155,6 @@ class photons():
             #self.layer_no += np.sign(self.vel[-1])
             self.pos[-1] = self.zt # moves the photon to the boundary.
             
-    
-           
             return True
         
         else:
@@ -206,9 +211,9 @@ class photons():
             
         else:
             # The photon is refracted according to Snells Law
-            u_x = self.vel[0] * self.ni / self.nt
-            u_y = self.vel[1] * self.ni / self.nt
-            u_z = np.sign(self.vel[-1]) * np.cos(alpha_t)
+            u_x = np.float(self.vel[0] * self.ni / self.nt)
+            u_y = np.float(self.vel[1] * self.ni / self.nt)
+            u_z = np.float(np.sign(self.vel[-1]) * np.cos(alpha_t))
 
             self.vel = np.array([u_x, u_y, u_z])
             
@@ -219,19 +224,30 @@ class photons():
 
     def photon_exit(self):
         #print('exiting')
-        exit_data = np.hstack([self.pos, self.W])
+        #exit_data = np.hstack([self.pos, self.W])
         #print(exit_data)
 
-        if self.pos[-1] == 0:
-            
-            self.reflectance = np.vstack([self.reflectance, exit_data])
+        if self.pos[-1] == 0 and not self.is_scattered:
+            exit_type = 1 #Tu
+            print ('Here')
+
+
+        elif self.pos[-1] == 0 and self.is_scattered:   
+            exit_type = 2 # Rd'
             #print('reflection', self.reflectance)
 
-        if self.pos[-1] == self.upper_bound:
+        elif self.pos[-1] == self.upper_bound and not self.is_scattered:
+            exit_type = 3, # Tu
             
-            self.transmittance = np.vstack([self.transmittance, exit_data])
-            #print('transmittance', self.transmittance)
 
+
+        elif self.pos[-1] == self.upper_bound and self.is_scattered:
+            exit_type = 4 # Td
+            #print('transmittance', self.transmittance)
+        
+        self.pos.astype(float)
+        self.W = np.float(self.W)
+        self.final = np.hstack((self.pos, self.W, exit_type))
         self.W = 0 
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
@@ -251,6 +267,7 @@ class photons():
 
     def scatter(self):
 
+        self.is_scattered = True
         
         g = 0.9 # Scattering Anisotropy for most biological tissue 
 
@@ -293,6 +310,7 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
+                self.final = np.hstack([self.pos, self.W, 5]) # 4 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
@@ -302,90 +320,6 @@ class photons():
     def photon_dead(self):
         # Currently the only mechanism for photon termination is roulette, include boundaries soon.
         pass
-
-
-
-
-
-def run(number):
-    
-    if number % 100 == 0:
-        print (number)
-    
-    two_layer = medium()
-    photon = photons(two_layer, weight=1)
-    
-
-    # Runs the photon trasnport for Monte Carlo photon trasnport 
-    while photon.alive:
-        
-        photon.stepSize()
-        photon.Refractive_index()
-
-        while photon.hit_boundary():
-            
-            #time.sleep(1)
-            #photon.fresnelReflection(two_layer.n0, two_layer.n1)
-            photon.transmission()
-            photon.Refractive_index()
-            
-        if photon.W == 0:
-            break
-    
-        
-        photon.move()
-        photon.absorb()
-        photon.scatter()
-        photon.roulette()
-       
-        
-    final_pos = np.concatenate((photon.pos, photon.vel))
-    
-    print (number)
-
-    return final_pos
-    
-
-if __name__ == '__main__':
-    t0 = time.time()
-
-    n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
-
-    names = ['x','y','z','vx','vy','vz']
-    photon_data = np.empty(len(names))
-
-    '''
-    # Linear computation for bugfixing
-    for i in range(numberPhotons):
-        photon_data = np.vstack([photon_data,run(i)])
-    '''
-    #'''
-    # create and configure the process pool
-    with mp.Pool(processes=n_cpu) as pool:
-        # execute tasks in order
-        for result in pool.map(run, range(numberPhotons)):
-            photon_data = np.vstack([photon_data, result])
-    #'''
-    
-    # process pool is closed automatically
-
-    t1 = time.time()
-    
-    print ('parallel time: ', t1 - t0)
-
-    df = pd.DataFrame(data=photon_data, columns=names)
-    df.drop(0, inplace=True)
-    print(df.head())
-    print(df.describe())
-    
-    
-    
-    plt.figure()
-    plt.hist(df['z'], bins=100)
-    plt.show()
-
-
 
 
 
