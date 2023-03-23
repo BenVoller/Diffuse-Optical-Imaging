@@ -19,10 +19,14 @@ def run(number):
         photon.stepSize()
         photon.Refractive_index()
 
+        if not photon.is_scattered:
+            # Only true if the photon hasnt moved yet and also 
+            photon.fresnelReflection() 
+
         while photon.hit_boundary():
             
             #time.sleep(1)
-            #photon.fresnelReflection(two_layer.n0, two_layer.n1)
+            
             photon.transmission()
             photon.Refractive_index()
             
@@ -84,7 +88,12 @@ if __name__ == '__main__':
 
     # Create a new column r that denotes the combined XY distance of the photons
     df['r'] = np.sqrt (df['x']**2 + df['y']**2)
-   
+    
+    reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
+    transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
+
+
+    
     print (df.head())
     plt.hist(df['z'], bins=100)
     plt.show()

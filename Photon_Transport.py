@@ -16,10 +16,7 @@ class photons():
 
         # These will record the values used to analyse the validity of the solver
         # Will soon need to also include wavelength.
-        self.reflectance = np.empty(4)          # Photons returning out 0 boundary
-        self.transmittance = np.empty(4)        # Photons leaving final boundary 
-        self.unsc_reflectance = np.empty(4)     # Photons leaving 0 boundary without being scattered.
-        self.unsc_transmittance = np.empty(4)   # Photons leaving final boundary without being scattered
+        self.unsc_reflectance = 0 
 
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
@@ -50,6 +47,8 @@ class photons():
 
         self.ni = 1
         self.nt = self.n_current
+
+        
      
 
 
@@ -160,15 +159,17 @@ class photons():
         else:
             return False
 
-    def fresnelReflection(self, n0, n1):
+    def fresnelReflection(self):
         
         # Takes the two refractive indices of the ambient medium and the first medium and conmputes the 
         # proportion that is refelcted according to Specualar Fresnel Reflectance 
-
+        n0 = self.ni
+        n1 = self.nt
         Rsp = ((n0 - n1) / (n0 + n1))**2
 
 
         self.W += -Rsp
+        self.unsc_reflectance += Rsp
 
 
     def move(self):
