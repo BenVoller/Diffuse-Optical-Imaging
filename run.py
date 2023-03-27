@@ -56,8 +56,8 @@ if __name__ == '__main__':
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
 
-    
-    # Linear computation for bugfixing
+    '''
+    #  Linear computation for bugfixing
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data, run(i)])
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         # execute tasks in order
         for result in pool.map(run, range(numberPhotons)):
             photon_data = np.vstack([photon_data, result])
-    '''
+    
     
     # process pool is closed automatically
 
@@ -92,9 +92,20 @@ if __name__ == '__main__':
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
 
+    print(transmittance.head())
+    print(reflectance.head())
 
+    # Sum of all reflectance and transmission values 
+    # Refelctance
+    R_tot = np.sum(reflectance['weight'])
+    # Transission 
+
+    T_tot = np.sum(transmittance['weight'])
+
+    print('Transmittance:', T_tot/numberPhotons)
+    print('Reflectance:', R_tot/numberPhotons)
     
-    print (df.head())
+    #print (df.head())
     plt.hist(df['z'], bins=100)
     plt.show()
     
