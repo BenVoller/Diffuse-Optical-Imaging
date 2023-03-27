@@ -50,6 +50,8 @@ class photons():
         self.nt = self.n_current
 
         
+
+        
      
 
 
@@ -69,14 +71,24 @@ class photons():
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
+        self.exiting = False
+
+        
         
         # Sets the next boundary to psuedo infinity
         if direction == 0: 
             db = 99999999
 
-        if z < self.distances[0]: 
+        
+
+        if z == self.distances[0] and direction == -1: 
+            # Exciting via reflection
+            self.exiting = True
+            zt = 999999
+            ni = self.indices[1]
+            nt = self.indices[0]
+
             
-            pass
 
         elif z < self.distances[1]:
             # current refractive index
@@ -84,7 +96,6 @@ class photons():
             
         
             if direction == 1:
-                
                 
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
@@ -127,12 +138,17 @@ class photons():
         elif z == self.distances[2]:
 
             ni = self.indices[2]
+            #print('Here1')
 
             if direction == 1:
+                #print('Here2')
+                self.exiting = True
                 zt = self.distances[3]
                 nt = self.indices[3]
 
-            if direction == -1: 
+            if direction == -1:
+                #print('Here3') 
+                self.exiting = False
                 zt = self.distances[1]
                 nt = self.indices[1]
 
@@ -157,7 +173,11 @@ class photons():
             
             return True
         
+        elif self.exiting:
+            self.photon_exit()
+        
         else:
+            #print ('not hitting')
             return False
 
     def fresnelReflection(self):
@@ -182,6 +202,7 @@ class photons():
         # Finds the refractive index of the initial layer and that of the new layer
 
     def transmission(self):
+        #print('Transmitting')
         # specular reflection 
         alpha_i = np.arccos(abs(self.vel[-1]))
 
@@ -208,9 +229,9 @@ class photons():
             
             
 
-        elif self.nt == 1: # i.e the photon is leaving the material.
+        elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            
+            print('Here_4')
             self.photon_exit()
             
         else:
