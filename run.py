@@ -33,7 +33,9 @@ def run(number):
             
             photon.transmission()
             photon.Refractive_index()
+            
             #print (photon.pos, photon.vel)
+            
             #print (photon.exiting)
 
             
@@ -59,7 +61,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 50000 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
