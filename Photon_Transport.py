@@ -30,8 +30,9 @@ class photons():
         self.vel = np.array([0,0,1])
 
         # Extinction coefficient
-        self.mu_a = 0.25
-        self.mu_t = 0.75
+        self.mu_a = 1/10
+        self.mu_s = 1/9
+        self.mu_t = self.mu_a + self.mu_s
 
         self.W = weight 
 
@@ -194,6 +195,8 @@ class photons():
             Ri = 1
 
         else: 
+            
+
             # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
             # be randomly polarised
             Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
@@ -258,7 +261,7 @@ class photons():
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
-        delW = self.mu_a / self.mu_t * self.W
+        delW = (self.mu_a / self.mu_t) * self.W
 
         # Insert some call to adding the weigh to relative absorption
 
