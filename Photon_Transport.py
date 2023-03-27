@@ -29,9 +29,9 @@ class photons():
         self.pos = np.array([0,0,0])
         self.vel = np.array([0,0,1])
 
-        # Extinction coefficient
-        self.mu_a = 1/10
-        self.mu_s = 1/9
+        # Extinction coefficient cm^-1
+        self.mu_a = 10
+        self.mu_s = 90
         self.mu_t = self.mu_a + self.mu_s
 
         self.W = weight 
@@ -65,6 +65,9 @@ class photons():
         
         self.s_ = -np.log(self.eta())
 
+        
+            
+
 
     def Refractive_index(self):
 
@@ -84,7 +87,7 @@ class photons():
         if z == self.distances[0] and direction == -1: 
             # Exciting via reflection
             self.exiting = True
-            zt = 999999
+            zt = 99999999
             ni = self.indices[1]
             nt = self.indices[0]
 
@@ -195,7 +198,7 @@ class photons():
 
     def move(self):
         
-        self.pos = self.pos + self.vel*self.s_
+        self.pos = self.pos + self.vel*(self.s_/self.mu_t)
         self.s_ = 0
 
     
@@ -216,8 +219,6 @@ class photons():
             Ri = 1
 
         else: 
-            
-
             # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
             # be randomly polarised
             Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
@@ -228,10 +229,10 @@ class photons():
             self.vel[-1] = -self.vel[-1]
             
             
-
+        #####'''I think this may be redundant'''
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            print('Here_4')
+            
             self.photon_exit()
             
         else:
@@ -253,7 +254,7 @@ class photons():
         #print(exit_data)
 
         if self.pos[-1] == 0 and not self.is_scattered:
-            exit_type = 1 #Tu
+            exit_type = 1 #Ru
             print ('Here')
 
 
@@ -262,6 +263,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
+            
             exit_type = 3, # Tu
             
 
@@ -294,10 +296,10 @@ class photons():
 
         self.is_scattered = True
         
-        g = 0.9 # Scattering Anisotropy for most biological tissue 
+        g = 0.75 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
-            theta = np.arccos((0.5*g)*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
+            theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
 
         else:
             theta = np.arccos(2*self.eta()-1)
