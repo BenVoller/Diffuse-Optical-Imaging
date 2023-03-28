@@ -26,12 +26,13 @@ class photons():
 
         self.alive = True 
         
-        self.pos = np.array([0,0,0])
-        self.vel = np.array([0,0,1])
+        self.pos = np.array([0,0,0], dtype=float)
+        self.vel = np.array([0,0,1], dtype=float)
 
-        # Extinction coefficient
-        self.mu_a = 0.25
-        self.mu_t = 0.75
+        # Extinction coefficient cm^-1
+        self.mu_a = 10
+        self.mu_s = 90
+        self.mu_t = self.mu_a + self.mu_s
 
         self.W = weight 
 
@@ -49,6 +50,8 @@ class photons():
         self.nt = self.n_current
 
         
+
+        
      
 
 
@@ -62,20 +65,33 @@ class photons():
         
         self.s_ = -np.log(self.eta())
 
+        
+            
+
 
     def Refractive_index(self):
 
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
+        self.exiting = False
+
+        
         
         # Sets the next boundary to psuedo infinity
         if direction == 0: 
             db = 99999999
 
-        if z < self.distances[0]: 
+        
+
+        if z == self.distances[0] and direction == -1: 
+            # Exciting via reflection
+            self.exiting = True
+            zt = 99999999
+            ni = self.indices[1]
+            nt = self.indices[0]
+
             
-            pass
 
         elif z < self.distances[1]:
             # current refractive index
@@ -83,7 +99,6 @@ class photons():
             
         
             if direction == 1:
-                
                 
                 # Distance to next layer, next refractive index
                 zt = self.distances[1]
@@ -126,12 +141,17 @@ class photons():
         elif z == self.distances[2]:
 
             ni = self.indices[2]
+            #print('Here1')
 
             if direction == 1:
+                
+                self.exiting = True
                 zt = self.distances[3]
                 nt = self.indices[3]
 
-            if direction == -1: 
+            if direction == -1:
+                #print('Here3') 
+                self.exiting = False
                 zt = self.distances[1]
                 nt = self.indices[1]
 
@@ -146,17 +166,26 @@ class photons():
         
     def hit_boundary(self):
         
+        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
+
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
+            print ('WE should be moving')
+            
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
+            print('before change', self.pos, self.zt)
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            
+            print('after change', self.pos, self.zt)
             return True
         
+        elif self.exiting:
+            self.photon_exit()
+        
         else:
+            #print ('not hitting')
             return False
 
     def fresnelReflection(self):
@@ -174,13 +203,15 @@ class photons():
 
     def move(self):
         
-        self.pos = self.pos + self.vel*self.s_
+        self.pos = self.pos + self.vel*(self.s_/self.mu_t)
         self.s_ = 0
 
     
         # Finds the refractive index of the initial layer and that of the new layer
 
     def transmission(self):
+
+        #print('Transmitting')
         # specular reflection 
         alpha_i = np.arccos(abs(self.vel[-1]))
 
@@ -188,10 +219,16 @@ class photons():
         
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
+        
+
         # Check if the photon is reflected if alpha_i is greater than the critical angle
 
         if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
             Ri = 1
+
+        elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
+            Ri = 0
 
         else: 
             # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
@@ -203,13 +240,14 @@ class photons():
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
             
-            
-
-        elif self.nt == 1: # i.e the photon is leaving the material.
+            '''
+        #####I think this may be redundant
+        elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            
+            print ('HERE')
             self.photon_exit()
-            
+            '''
+          
         else:
             # The photon is refracted according to Snells Law
             u_x = np.float(self.vel[0] * self.ni / self.nt)
@@ -229,7 +267,7 @@ class photons():
         #print(exit_data)
 
         if self.pos[-1] == 0 and not self.is_scattered:
-            exit_type = 1 #Tu
+            exit_type = 1 #Ru
             print ('Here')
 
 
@@ -238,6 +276,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
+            print ('THIS TIME BABY')
             exit_type = 3, # Tu
             
 
@@ -258,7 +297,7 @@ class photons():
 
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
-        delW = self.mu_a / self.mu_t * self.W
+        delW = (self.mu_a / self.mu_t) * self.W
 
         # Insert some call to adding the weigh to relative absorption
 
@@ -270,10 +309,10 @@ class photons():
 
         self.is_scattered = True
         
-        g = 0.9 # Scattering Anisotropy for most biological tissue 
+        g = 0.75 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
-            theta = np.arccos((0.5*g)*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
+            theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
 
         else:
             theta = np.arccos(2*self.eta()-1)

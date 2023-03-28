@@ -2,7 +2,7 @@ import numpy as np
 
 class medium():
 
-    def __init__(self, n1=2.0, z1=2.0, n2=4.0, z2=4.0):
+    def __init__(self, n1=1, z1=0.01, n2=1, z2=0.02):
 
         self.size = z1 + z2
         # refractive indexes

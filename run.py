@@ -7,6 +7,7 @@ np.random.seed(1234)
 def run(number):
     
     if number % 100 == 0:
+        #time.sleep(3)
         print (number)
     
     two_layer = medium()
@@ -18,6 +19,9 @@ def run(number):
         
         photon.stepSize()
         photon.Refractive_index()
+        #print ('Lets gooo')
+        #print (photon.db)
+        #print (photon.s_)
 
         if not photon.is_scattered:
             # Only true if the photon hasnt moved yet and also 
@@ -25,15 +29,22 @@ def run(number):
 
         while photon.hit_boundary():
             
+            
             #time.sleep(1)
             
             photon.transmission()
             photon.Refractive_index()
             
+            #print (photon.pos, photon.vel)
+            
+            #print (photon.exiting)
+
+            
+            
         if photon.W == 0:
             
             return photon.final
-            
+        
         photon.move()
         photon.absorb()
         photon.scatter()
@@ -51,13 +62,13 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 50000 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
 
     
-    # Linear computation for bugfixing
+    #  Linear computation for bugfixing
     for i in range(numberPhotons):
         photon_data = np.vstack([photon_data, run(i)])
 
@@ -83,6 +94,11 @@ if __name__ == '__main__':
     #print(df.info())
     print(df.describe())
 
+    with open('0.2_Nrel=1.csv', 'wb') as f:
+            np.save(f, df)
+
+    
+
     # Separates the unscattered trnasmission from the model. Tu:0, td:1, Ru:2, Rd:3, Ab:4
     
 
@@ -92,9 +108,24 @@ if __name__ == '__main__':
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
 
+    print(transmittance.head())
+    print(reflectance.head())
 
+    # Sum of all reflectance and transmission values 
+    # Refelctance
+    R_tot = np.sum(reflectance['weight'])
+    # Transission 
+
+    T_unscattered = df[(df['type']==3)]
+    T_tot_unscattered = np.sum(T_unscattered['weight'])
+
+    T_tot = np.sum(transmittance['weight'])
+
+    print('Transmittance:', T_tot/numberPhotons)
+    print('Reflectance:', R_tot/numberPhotons)
+    print('Unscattered transmittance:', T_tot_unscattered/numberPhotons)
     
-    print (df.head())
+    #print (df.head())
     plt.hist(df['z'], bins=100)
     plt.show()
     
