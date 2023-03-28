@@ -29,6 +29,7 @@ def run(number):
 
         while photon.hit_boundary():
             
+            
             #time.sleep(1)
             
             photon.transmission()
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 50000 # Number of photons
+    numberPhotons = 10 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))

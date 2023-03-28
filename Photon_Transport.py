@@ -144,7 +144,7 @@ class photons():
             #print('Here1')
 
             if direction == 1:
-                #print('Here2')
+                
                 self.exiting = True
                 zt = self.distances[3]
                 nt = self.indices[3]
@@ -166,9 +166,13 @@ class photons():
         
     def hit_boundary(self):
         
+        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
+
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
+            print ('WE should be moving')
+            
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
@@ -205,6 +209,7 @@ class photons():
         # Finds the refractive index of the initial layer and that of the new layer
 
     def transmission(self):
+
         #print('Transmitting')
         # specular reflection 
         alpha_i = np.arccos(abs(self.vel[-1]))
@@ -213,10 +218,15 @@ class photons():
         
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
+        print ('alpha_i, alpha_t', alpha_i, alpha_t)
+
         # Check if the photon is reflected if alpha_i is greater than the critical angle
 
         if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
             Ri = 1
+
+        elif alpha_i == 0 and alpha_t == 0:
+            Ri = 0
 
         else: 
             # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
@@ -228,13 +238,14 @@ class photons():
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
             
-            
-        #####'''I think this may be redundant'''
+            '''
+        #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            
+            print ('HERE')
             self.photon_exit()
-            
+            '''
+          
         else:
             # The photon is refracted according to Snells Law
             u_x = np.float(self.vel[0] * self.ni / self.nt)
@@ -263,7 +274,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            
+            print ('THIS TIME BABY')
             exit_type = 3, # Tu
             
 
