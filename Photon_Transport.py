@@ -166,19 +166,19 @@ class photons():
         
     def hit_boundary(self):
         
-        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
+        #print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
 
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
-            print ('WE should be moving')
+            #print ('WE should be moving')
             
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.zt)
+            
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            print('after change', self.pos, self.zt)
+            
             return True
         
         elif self.exiting:
@@ -309,7 +309,7 @@ class photons():
 
         self.is_scattered = True
         
-        g = 0.75 # Scattering Anisotropy for most biological tissue 
+        g = 0 # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
             theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
