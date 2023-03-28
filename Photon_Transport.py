@@ -26,8 +26,8 @@ class photons():
 
         self.alive = True 
         
-        self.pos = np.array([0,0,0])
-        self.vel = np.array([0,0,1])
+        self.pos = np.array([0,0,0], dtype=float)
+        self.vel = np.array([0,0,1], dtype=float)
 
         # Extinction coefficient cm^-1
         self.mu_a = 10
@@ -176,8 +176,9 @@ class photons():
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
+            print('before change', self.pos, self.zt)
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            
+            print('after change', self.pos, self.zt)
             return True
         
         elif self.exiting:
@@ -218,7 +219,7 @@ class photons():
         
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
-        print ('alpha_i, alpha_t', alpha_i, alpha_t)
+        
 
         # Check if the photon is reflected if alpha_i is greater than the critical angle
 
@@ -226,6 +227,7 @@ class photons():
             Ri = 1
 
         elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
             Ri = 0
 
         else: 
