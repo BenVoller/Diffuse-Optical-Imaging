@@ -166,19 +166,18 @@ class photons():
         
     def hit_boundary(self):
         
-        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
-
+        
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
-            print ('WE should be moving')
+            
             
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.zt)
+            
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            print('after change', self.pos, self.zt)
+            
             return True
         
         elif self.exiting:
@@ -268,7 +267,7 @@ class photons():
 
         if self.pos[-1] == 0 and not self.is_scattered:
             exit_type = 1 #Ru
-            print ('Here')
+            
 
 
         elif self.pos[-1] == 0 and self.is_scattered:   
@@ -276,7 +275,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            print ('THIS TIME BABY')
+            
             exit_type = 3, # Tu
             
 
@@ -287,7 +286,7 @@ class photons():
         
         self.pos.astype(float)
         self.W = np.float(self.W)
-        self.final = np.hstack((self.pos, self.W, exit_type))
+        self.final = np.hstack((self.pos, self.vel, self.W, exit_type))
         self.W = 0 
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
@@ -350,7 +349,7 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
-                self.final = np.hstack([self.pos, self.W, 5]) # 4 corresponds to Absorbed Ab
+                self.final = np.hstack([self.pos, self.vel, self.W, 5]) # 4 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
