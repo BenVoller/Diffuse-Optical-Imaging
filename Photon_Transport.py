@@ -166,26 +166,26 @@ class photons():
         
     def hit_boundary(self):
         
-        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
+        #print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
 
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
-            print ('WE should be moving')
+            # print ('WE should be moving')
             
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.zt)
+            # print('before change', self.pos, self.zt)
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            print('after change', self.pos, self.zt)
+            # ('after change', self.pos, self.zt)
             return True
         
         elif self.exiting:
             self.photon_exit()
         
         else:
-            #print ('not hitting')
+            
             return False
 
     def fresnelReflection(self):
@@ -268,7 +268,7 @@ class photons():
 
         if self.pos[-1] == 0 and not self.is_scattered:
             exit_type = 1 #Ru
-            print ('Here')
+            
 
 
         elif self.pos[-1] == 0 and self.is_scattered:   
@@ -276,7 +276,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            print ('THIS TIME BABY')
+            
             exit_type = 3, # Tu
             
 

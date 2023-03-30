@@ -62,7 +62,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 50000 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
     names = ['x','y','z','weight','type']
     photon_data = np.empty(len(names))
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     #df.drop(columns=0, inplace=True)
     print(df.head(20))
     #print(df.info())
-    print(df.describe())
+    # print(df.describe())
 
     with open('0.2_Nrel=1.csv', 'wb') as f:
             np.save(f, df)
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 
     # Create a new column r that denotes the combined XY distance of the photons
     df['r'] = np.sqrt (df['x']**2 + df['y']**2)
+    print (df.head())
     
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
@@ -124,9 +125,13 @@ if __name__ == '__main__':
     print('Transmittance:', T_tot/numberPhotons)
     print('Reflectance:', R_tot/numberPhotons)
     print('Unscattered transmittance:', T_tot_unscattered/numberPhotons)
+
+
+    transmittance['r']
     
     #print (df.head())
-    plt.hist(df['z'], bins=100)
+    plt.figure()
+    plt.hist(transmittance['weight'], bins=100)
     plt.show()
     
  
