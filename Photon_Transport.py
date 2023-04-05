@@ -44,23 +44,26 @@ class photons():
         self.distances = medium.distances
         self.z_current = self.distances[1] 
 
-        self.upper_bound = self.distances[2]
+        #self.upper_bound = self.distances[2]
 
         self.ni = 1
         self.nt = self.n_current
 
         # [depth, refractive_index, u_a, u_t, g]
-        layer_null = [-999.9, 1, 0, 0, 0]
-        layer0 = [float(0), 1, 0, 0, 0]
+        layer_null = [-999.9, 1, 1, 1, 0]
+        layer0 = [float(0), 1, 1, 1, 0]
         layer1 = [0.1, 1, 10, 90, 0.75]
         layer2 = [0.2, 1, 10, 90, 0.75]
-        layer3 = [999.9, 1, 0, 0, 0]
+        layer3 = [999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
                        0:layer0,
                        1:layer1,
                        2:layer2,
                        3:layer3}
+        
+        self.upper_bound = self.layers[2][0]
+        self.lower_bound = self.layers[0][0]
 
         
      
@@ -186,46 +189,67 @@ class photons():
         if direction == 0: 
             self.db = 99999999
 
-
+        
         
 
-        for i in range(len(self.layers)):
+        for i in range(-1,len(self.layers)):
+
+            self.current_coeffs = self.layers[i]
+
+            self.mu_a = self.layers[i][2]
+            self.mu_s = self.layers[i][3]
+            self.mu_t = self.mu_a + self.mu_s
 
             if z < self.layers[i][0] and direction == 1:
-
-                if z == self.layers[len(self.layers) -2][0]:
+               
+                
+                if z == self.upper_bound:
+                    print ('Exciting here')
                     self.exiting = True
+                    
+                    
 
+                # Sets the layers based on direction = 1
+                
+                
                 self.ni = self.layers[i-1][1]
                 self.nt = self.layers[i][1]
                 self.zt = self.layers[i][0]
                 self.db = (self.zt - z) / self.vel[-1]
-
                 break
 
             if z < self.layers[i][0] and direction == -1:
-                print ('@WOW')
                 
-
+                # Sets the layers based on dir = -1
                 self.ni = self.layers[i][1]
                 self.nt = self.layers[i-1][1]
                 self.zt = self.layers[i-1][0]
 
-                if z == self.layers[0][0]:
-                    print ('Exciting')
+                # Checking if the photon is exciting
+                if z == self.lower_bound:
+                    # print('This should have happened')
                     self.exiting = True
+                    
+                    
 
-
-                print ('zt', self.zt)
-                [print('z', z)]
+                # Checking if the nearest boundary is current position
+                # in which case it is set to a the one lower
+                # print(self.pos,self.vel, direction,self.db)
 
                 if self.zt == z:
-                    print ('YOu good bro') 
+                    # print ('is this triggering')
+                    self.ni = self.layers[i-1][1]
+                    self.nt = self.layers[i-2][1]
                     self.zt = self.layers[i-2][0]
+                    # Accounts that this is immediately moving out of the layer 
+                    self.current_layer = self.layers[i-1]
 
-                print ('z,zt:', z, self.zt)
+                    self.mu_a = self.layers[i-1][2]
+                    self.mu_s = self.layers[i-1][3]
+                    self.mu_t = self.mu_a + self.mu_s
+
+                # Sets the distance to the boundary
                 self.db = (self.zt - z) / self.vel[-1]
-                
                 break
 
             
@@ -239,18 +263,16 @@ class photons():
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
-            print ('WE should be moving')
             
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.vel)
             self.pos[-1] = self.zt # moves the photon to the boundary.
             
             return True
         
-        elif self.exiting:
-            self.photon_exit()
+        #elif self.exiting:
+            #self.photon_exit()
         
         else:
             #print ('not hitting')
@@ -308,13 +330,13 @@ class photons():
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
             
-            '''
+            
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
             print ('HERE')
             self.photon_exit()
-            '''
+            
           
         else:
             # The photon is refracted according to Snells Law
