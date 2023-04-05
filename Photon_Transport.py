@@ -271,8 +271,9 @@ class photons():
             
             return True
         
-        #elif self.exiting:
-            #self.photon_exit()
+        elif self.exiting:
+            self.transmission()
+            return False
         
         else:
             #print ('not hitting')
