@@ -50,12 +50,14 @@ class photons():
         self.nt = self.n_current
 
         # [depth, refractive_index, u_a, u_t, g]
+        layer_null = [-999.9, 1, 0, 0, 0]
         layer0 = [float(0), 1, 0, 0, 0]
-        layer1 = [0.2, 1.5, 10, 90, 0.75]
-        layer2 = [0.4, 1.5, 10, 90, 0.75]
-        layer3 = [999.9, 1, 0, 0, 0.75]
+        layer1 = [0.1, 1, 10, 90, 0.75]
+        layer2 = [0.2, 1, 10, 90, 0.75]
+        layer3 = [999.9, 1, 0, 0, 0]
 
-        self.layers = {0:layer0,
+        self.layers = {-1:layer_null,
+                       0:layer0,
                        1:layer1,
                        2:layer2,
                        3:layer3}
@@ -184,21 +186,46 @@ class photons():
         if direction == 0: 
             self.db = 99999999
 
+
+        
+
         for i in range(len(self.layers)):
 
             if z < self.layers[i][0] and direction == 1:
+
+                if z == self.layers[len(self.layers) -2][0]:
+                    self.exiting = True
 
                 self.ni = self.layers[i-1][1]
                 self.nt = self.layers[i][1]
                 self.zt = self.layers[i][0]
                 self.db = (self.zt - z) / self.vel[-1]
+
                 break
 
             if z < self.layers[i][0] and direction == -1:
+                print ('@WOW')
+                
+
                 self.ni = self.layers[i][1]
                 self.nt = self.layers[i-1][1]
                 self.zt = self.layers[i-1][0]
+
+                if z == self.layers[0][0]:
+                    print ('Exciting')
+                    self.exiting = True
+
+
+                print ('zt', self.zt)
+                [print('z', z)]
+
+                if self.zt == z:
+                    print ('YOu good bro') 
+                    self.zt = self.layers[i-2][0]
+
+                print ('z,zt:', z, self.zt)
                 self.db = (self.zt - z) / self.vel[-1]
+                
                 break
 
             
@@ -217,9 +244,9 @@ class photons():
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.zt)
+            print('before change', self.pos, self.vel)
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            print('after change', self.pos, self.zt)
+            
             return True
         
         elif self.exiting:
