@@ -1,5 +1,9 @@
 from material import *
+
 from Photon_Transport import *
+
+print (np.__version__)
+print (pd.__version__)
 import seaborn as sns
 np.random.seed(1234)
 
@@ -91,7 +95,8 @@ if __name__ == '__main__':
     df.drop(0, inplace=True)
     #df.drop(columns=0, inplace=True)
     
-    #print(df.info())
+    print(df.head())
+    print(df.describe())
     
 
     with open('0.2_Nrel=1.csv', 'wb') as f:
@@ -109,8 +114,8 @@ if __name__ == '__main__':
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
 
-    print(transmittance.head())
-    print(reflectance.head())
+    #print(transmittance.head())
+    #print(reflectance.head())
 
     # Sum of all reflectance and transmission values 
     # Refelctance
@@ -128,7 +133,7 @@ if __name__ == '__main__':
 
     d_transmittance = df[df['type'] == 4]
     #d_transmittance['bins'] = pd.cut(d_transmittance['r'], 10)
-    print(d_transmittance.head())
+    #print(d_transmittance.head())
     
     #print (df.head())
     #plt.hist(d_transmittance['weight'], bins=d_transmittance['bins'])

@@ -21,21 +21,15 @@ class photons():
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
 
-        self.z0 = 1
-        self.z1 = medium.z1
-
         self.alive = True 
         
         self.pos = np.array([0,0,0], dtype=float)
         self.vel = np.array([0,0,1], dtype=float)
 
         # Extinction coefficient cm^-1
-        self.mu_a = 10
-        self.mu_s = 90
-        self.mu_t = self.mu_a + self.mu_s
 
         self.W = weight 
-
+        '''
         # These are the refractive indices and the current one is set to the first in the array 
         self.indices = medium.layers
         self.n_current = self.indices[0]
@@ -43,17 +37,17 @@ class photons():
 
         self.distances = medium.distances
         self.z_current = self.distances[1] 
-
+        
         #self.upper_bound = self.distances[2]
 
         self.ni = 1
         self.nt = self.n_current
-
-        # [depth, refractive_index, u_a, u_t, g]
+        '''
+        # [depth, refractive_index(n), u_a, u_t, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.1, 1, 10, 90, 0.75]
-        layer2 = [0.2, 1, 10, 90, 0.75]
+        layer1 = [0.01, 1, 10, 90, 0.75]
+        layer2 = [0.02, 1, 10, 90, 0.75]
         layer3 = [999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -198,13 +192,14 @@ class photons():
 
             self.mu_a = self.layers[i][2]
             self.mu_s = self.layers[i][3]
+            self.g = self.layers[i][4]
             self.mu_t = self.mu_a + self.mu_s
 
             if z < self.layers[i][0] and direction == 1:
                
                 
                 if z == self.upper_bound:
-                    print ('Exciting here')
+                    #print ('Exciting here')
                     self.exiting = True
                     
                     
@@ -246,7 +241,9 @@ class photons():
 
                     self.mu_a = self.layers[i-1][2]
                     self.mu_s = self.layers[i-1][3]
+                    self.g = self.layers[i-1][4]
                     self.mu_t = self.mu_a + self.mu_s
+                    
 
                 # Sets the distance to the boundary
                 self.db = (self.zt - z) / self.vel[-1]
@@ -335,7 +332,7 @@ class photons():
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            print ('HERE')
+            #print ('HERE')
             self.photon_exit()
             
           
@@ -400,7 +397,7 @@ class photons():
 
         self.is_scattered = True
         
-        g = 0.75 # Scattering Anisotropy for most biological tissue 
+        g = self.g # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
             theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
