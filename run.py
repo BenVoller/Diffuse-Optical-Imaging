@@ -1,5 +1,9 @@
 from material import *
+
 from Photon_Transport import *
+
+print (np.__version__)
+print (pd.__version__)
 import seaborn as sns
 np.random.seed(1234)
 
@@ -14,7 +18,7 @@ def run(number):
     photon = photons(two_layer, weight=1)
     
 
-    # Runs the photon trasnport for Monte Carlo photon trasnport 
+    # Runs the photon trasnport for Monte Carlo photon transport 
     while photon.alive:
         
         photon.stepSize()
@@ -28,7 +32,7 @@ def run(number):
             photon.fresnelReflection() 
 
         while photon.hit_boundary():
-            
+            #time.sleep(2)
             
             #time.sleep(1)
             
@@ -62,9 +66,9 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 50000 # Number of photons
+    numberPhotons = 1000 # Number of photons
 
-    names = ['x','y','z','weight','type']
+    names = ['x','y','z','vx','vy', 'vz', 'weight','type']
     photon_data = np.empty(len(names))
 
     
@@ -90,9 +94,10 @@ if __name__ == '__main__':
     df['type'] = df['type'].astype(int)
     df.drop(0, inplace=True)
     #df.drop(columns=0, inplace=True)
-    print(df.head(20))
-    #print(df.info())
+    
+    print(df.head())
     print(df.describe())
+    
 
     with open('0.2_Nrel=1.csv', 'wb') as f:
             np.save(f, df)
@@ -104,12 +109,13 @@ if __name__ == '__main__':
 
     # Create a new column r that denotes the combined XY distance of the photons
     df['r'] = np.sqrt (df['x']**2 + df['y']**2)
-    
+    df['angle'] = np.arccos(df['vz'] / np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2))
+     
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
 
-    print(transmittance.head())
-    print(reflectance.head())
+    #print(transmittance.head())
+    #print(reflectance.head())
 
     # Sum of all reflectance and transmission values 
     # Refelctance
@@ -124,9 +130,13 @@ if __name__ == '__main__':
     print('Transmittance:', T_tot/numberPhotons)
     print('Reflectance:', R_tot/numberPhotons)
     print('Unscattered transmittance:', T_tot_unscattered/numberPhotons)
+
+    d_transmittance = df[df['type'] == 4]
+    #d_transmittance['bins'] = pd.cut(d_transmittance['r'], 10)
+    #print(d_transmittance.head())
     
     #print (df.head())
-    plt.hist(df['z'], bins=100)
+    #plt.hist(d_transmittance['weight'], bins=d_transmittance['bins'])
     plt.show()
     
  

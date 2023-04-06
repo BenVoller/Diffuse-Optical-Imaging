@@ -21,21 +21,15 @@ class photons():
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
 
-        self.z0 = 1
-        self.z1 = medium.z1
-
         self.alive = True 
         
         self.pos = np.array([0,0,0], dtype=float)
         self.vel = np.array([0,0,1], dtype=float)
 
         # Extinction coefficient cm^-1
-        self.mu_a = 10
-        self.mu_s = 90
-        self.mu_t = self.mu_a + self.mu_s
 
         self.W = weight 
-
+        '''
         # These are the refractive indices and the current one is set to the first in the array 
         self.indices = medium.layers
         self.n_current = self.indices[0]
@@ -43,13 +37,27 @@ class photons():
 
         self.distances = medium.distances
         self.z_current = self.distances[1] 
-
-        self.upper_bound = self.distances[2]
+        
+        #self.upper_bound = self.distances[2]
 
         self.ni = 1
         self.nt = self.n_current
+        '''
+        # [depth, refractive_index(n), u_a, u_t, g]
+        layer_null = [-999.9, 1, 1, 1, 0]
+        layer0 = [float(0), 1, 1, 1, 0]
+        layer1 = [0.01, 1, 10, 90, 0.75]
+        layer2 = [0.02, 1, 10, 90, 0.75]
+        layer3 = [999.9, 1, 1, 1, 0]
 
+        self.layers = {-1:layer_null,
+                       0:layer0,
+                       1:layer1,
+                       2:layer2,
+                       3:layer3}
         
+        self.upper_bound = self.layers[2][0]
+        self.lower_bound = self.layers[0][0]
 
         
      
@@ -68,7 +76,7 @@ class photons():
         
             
 
-
+    '''
     def Refractive_index(self):
 
         # Returns a postive or negative number based on the direction of the photon
@@ -163,26 +171,106 @@ class photons():
         self.db = db    # distance to boundary 
         self.zt = zt  # depth of next boundary
 
+    '''
+
+    def Refractive_index(self):
+
+        # Returns a postive or negative number based on the direction of the photon
+        direction = np.sign(self.vel[-1])
+        z = self.pos[-1]
+        self.exiting = False
+
+        if direction == 0: 
+            self.db = 99999999
+
         
+        
+
+        for i in range(-1,len(self.layers)):
+
+            self.current_coeffs = self.layers[i]
+
+            self.mu_a = self.layers[i][2]
+            self.mu_s = self.layers[i][3]
+            self.g = self.layers[i][4]
+            self.mu_t = self.mu_a + self.mu_s
+
+            if z < self.layers[i][0] and direction == 1:
+               
+                
+                if z == self.upper_bound:
+                    #print ('Exciting here')
+                    self.exiting = True
+                    
+                    
+
+                # Sets the layers based on direction = 1
+                
+                
+                self.ni = self.layers[i-1][1]
+                self.nt = self.layers[i][1]
+                self.zt = self.layers[i][0]
+                self.db = (self.zt - z) / self.vel[-1]
+                break
+
+            if z < self.layers[i][0] and direction == -1:
+                
+                # Sets the layers based on dir = -1
+                self.ni = self.layers[i][1]
+                self.nt = self.layers[i-1][1]
+                self.zt = self.layers[i-1][0]
+
+                # Checking if the photon is exciting
+                if z == self.lower_bound:
+                    # print('This should have happened')
+                    self.exiting = True
+                    
+                    
+
+                # Checking if the nearest boundary is current position
+                # in which case it is set to a the one lower
+                # print(self.pos,self.vel, direction,self.db)
+
+                if self.zt == z:
+                    # print ('is this triggering')
+                    self.ni = self.layers[i-1][1]
+                    self.nt = self.layers[i-2][1]
+                    self.zt = self.layers[i-2][0]
+                    # Accounts that this is immediately moving out of the layer 
+                    self.current_layer = self.layers[i-1]
+
+                    self.mu_a = self.layers[i-1][2]
+                    self.mu_s = self.layers[i-1][3]
+                    self.g = self.layers[i-1][4]
+                    self.mu_t = self.mu_a + self.mu_s
+                    
+
+                # Sets the distance to the boundary
+                self.db = (self.zt - z) / self.vel[-1]
+                break
+
+            
+
+
+
     def hit_boundary(self):
         
-        print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
+        #print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
 
         # Calls the Refractive index function to find the position and location of the next boundary
 
         if abs(self.db*self.mu_t) < abs(self.s_):
-            print ('WE should be moving')
             
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
             #self.layer_no += np.sign(self.vel[-1])
-            print('before change', self.pos, self.zt)
             self.pos[-1] = self.zt # moves the photon to the boundary.
-            print('after change', self.pos, self.zt)
+            
             return True
         
         elif self.exiting:
-            self.photon_exit()
+            self.transmission()
+            return False
         
         else:
             #print ('not hitting')
@@ -240,13 +328,13 @@ class photons():
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
             
-            '''
+            
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            print ('HERE')
+            #print ('HERE')
             self.photon_exit()
-            '''
+            
           
         else:
             # The photon is refracted according to Snells Law
@@ -287,7 +375,7 @@ class photons():
         
         self.pos.astype(float)
         self.W = np.float(self.W)
-        self.final = np.hstack((self.pos, self.W, exit_type))
+        self.final = np.hstack((self.pos, self.vel, self.W, exit_type))
         self.W = 0 
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
@@ -309,7 +397,7 @@ class photons():
 
         self.is_scattered = True
         
-        g = 0.75 # Scattering Anisotropy for most biological tissue 
+        g = self.g # Scattering Anisotropy for most biological tissue 
 
         if g != 0:
             theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))
@@ -350,7 +438,7 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
-                self.final = np.hstack([self.pos, self.W, 5]) # 4 corresponds to Absorbed Ab
+                self.final = np.hstack([self.pos,self.vel, self.W, 5]) # 4 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
