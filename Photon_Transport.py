@@ -248,7 +248,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            print ('THIS TIME BABY')
+            
             exit_type = 3, # Tu
             
 
@@ -256,11 +256,13 @@ class photons():
         elif self.pos[-1] == self.upper_bound and self.is_scattered:
             exit_type = 4 # Td
             #print('transmittance', self.transmittance)
-        
+
         self.pos.astype(float)
         self.W = np.float(self.W)
         self.final = np.hstack((self.pos, self.vel, self.W, exit_type))
         self.W = 0 
+
+
 
         # Unalives photon but the weight and energy is recorded for within th reflection and transmission    
         self.alive = False    

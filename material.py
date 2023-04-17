@@ -20,6 +20,8 @@ class medium():
                        1:layer1,
                        2:layer2,
                        3:layer3}
+        
+        self.depth = 0.02
 
 
      

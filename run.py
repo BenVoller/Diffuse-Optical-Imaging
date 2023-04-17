@@ -85,7 +85,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = 10000 # Number of photons
 
     names = ['x','y','z','vx','vy', 'vz', 'weight','type']
     photon_data = np.empty(len(names))
@@ -93,7 +93,11 @@ if __name__ == '__main__':
     
     #  Linear computation for bugfixing
     for i in range(numberPhotons):
-        photon_data = np.vstack([photon_data, run(i)])
+
+        data = run(i)
+        
+
+        photon_data = np.vstack([photon_data, data])
 
     '''
     # create and configure the process pool
@@ -114,11 +118,6 @@ if __name__ == '__main__':
     df.drop(0, inplace=True)
     #df.drop(columns=0, inplace=True)
 
-    with open('0.2_Nrel=1.csv', 'wb') as f:
-            np.save(f, df)
-
-    
-
     # Separates the unscattered trnasmission from the model. Tu:0, td:1, Ru:2, Rd:3, Ab:4
     
 
@@ -127,8 +126,33 @@ if __name__ == '__main__':
     df['angle'] = np.arccos(df['vz'] / np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2))
     df['solid_angle'] = 2*np.pi*(1 - np.cos(df['angle'])) / (df['vx']**2 + df['vy']**2 + df['vz']**2)
 
+    df.to_csv('testing_data.csv')
+
     print(df.head())
     print(df.describe())
+
+    #
+    #
+    # Defining Reflectance and Transmission as arrays 
+    #
+    #
+
+    # Issue saving and reading CSV file so will move this to its own file later
+
+    #delta_r = df['z'].max / 10
+
+    #print (delta_r)
+
+
+
+
+
+
+
+
+
+
+    #%%
      
     reflectance =  df[(df['type'] == 1) | (df['type'] == 2)]
     transmittance = df[(df['type'] == 3) | (df['type'] == 4)]
@@ -159,6 +183,11 @@ if __name__ == '__main__':
     print('Transmittance:', T_tot/numberPhotons)
     print('Reflectance:', R_tot/numberPhotons)
     print('Unscattered transmittance:', T_tot_unscattered/numberPhotons)
+
+
+
+
+
 
 
 
