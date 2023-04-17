@@ -18,6 +18,9 @@ class photons():
         # Will soon need to also include wavelength.
         self.unsc_reflectance = 0 
 
+        # Wavelength of input light that may become an array when run in practise
+        self.wavelength = 1000 #Hz
+
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
 
@@ -29,32 +32,11 @@ class photons():
         # Extinction coefficient cm^-1
 
         self.W = weight 
-        '''
-        # These are the refractive indices and the current one is set to the first in the array 
-        self.indices = medium.layers
-        self.n_current = self.indices[0]
-        self.layer_no = 0 # Defines which layer we are starting in
-
-        self.distances = medium.distances
-        self.z_current = self.distances[1] 
         
-        #self.upper_bound = self.distances[2]
+       
 
-        self.ni = 1
-        self.nt = self.n_current
-        '''
-        # [depth, refractive_index(n), u_a, u_t, g]
-        layer_null = [-999.9, 1, 1, 1, 0]
-        layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.01, 1, 10, 90, 0.75]
-        layer2 = [0.02, 1, 10, 90, 0.75]
-        layer3 = [999.9, 1, 1, 1, 0]
-
-        self.layers = {-1:layer_null,
-                       0:layer0,
-                       1:layer1,
-                       2:layer2,
-                       3:layer3}
+        self. layers = medium.layers
+        
         
         self.upper_bound = self.layers[2][0]
         self.lower_bound = self.layers[0][0]
@@ -74,104 +56,6 @@ class photons():
         self.s_ = -np.log(self.eta())
 
         
-            
-
-    '''
-    def Refractive_index(self):
-
-        # Returns a postive or negative number based on the direction of the photon
-        direction = np.sign(self.vel[-1])
-        z = self.pos[-1]
-        self.exiting = False
-
-        
-        
-        # Sets the next boundary to psuedo infinity
-        if direction == 0: 
-            db = 99999999
-
-        
-
-        if z == self.distances[0] and direction == -1: 
-            # Exciting via reflection
-            self.exiting = True
-            zt = 99999999
-            ni = self.indices[1]
-            nt = self.indices[0]
-
-            
-
-        elif z < self.distances[1]:
-            # current refractive index
-            ni = self.indices[1]
-            
-        
-            if direction == 1:
-                
-                # Distance to next layer, next refractive index
-                zt = self.distances[1]
-                
-                nt = self.indices[2]
-                
-
-                
-            elif direction == -1:
-                zt = self.distances[0]
-                nt = self.indices[0]
-
-        elif z == self.distances[1]: 
-            
-            if direction == 1:
-                ni = self.indices[2]
-                nt = self.indices[3]
-                zt = self.distances[2]
-
-            elif direction == -1:
-                 ni = self.indices[1]
-                 nt = self.indices[0]
-                 zt = self.distances[0]
-
-        elif z < self.distances[2]: 
-            # current refractive index
-            
-            
-            ni = self.indices[2]
-
-            if direction == 1:
-                # Distance to next layer, next refractive index
-                zt = self.distances[2]
-                nt = self.indices[3]
-
-            elif direction == -1:
-                zt = self.distances[1]
-                nt = self.indices[1]
-
-        elif z == self.distances[2]:
-
-            ni = self.indices[2]
-            #print('Here1')
-
-            if direction == 1:
-                
-                self.exiting = True
-                zt = self.distances[3]
-                nt = self.indices[3]
-
-            if direction == -1:
-                #print('Here3') 
-                self.exiting = False
-                zt = self.distances[1]
-                nt = self.indices[1]
-
-    
-        db = (zt - z) / self.vel[-1]
-        # Returns the current refractive layer and then the next layer which the photon is incident upon 
-        self.ni = ni   #current n
-        self.nt = nt   # new n of next layer
-        self.db = db    # distance to boundary 
-        self.zt = zt  # depth of next boundary
-
-    '''
 
     def Refractive_index(self):
 
@@ -449,6 +333,12 @@ class photons():
         # Currently the only mechanism for photon termination is roulette, include boundaries soon.
         pass
 
+
+    def raman_shift(self):
+        # Raman scatters the wavelength of the tissue based on a low random chance 
+        # and also a sampling of the makeup of the tissue being investigated.
+
+        self.wavelength 
 
 
 
