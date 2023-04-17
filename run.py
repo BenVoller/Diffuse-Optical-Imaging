@@ -123,32 +123,13 @@ if __name__ == '__main__':
 
     # Create a new column r that denotes the combined XY distance of the photons
     df['r'] = np.sqrt (df['x']**2 + df['y']**2)
-    df['angle'] = np.arccos(df['vz'] / np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2))
+    df['angle'] = np.arccos(abs(df['vz']) / np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2))
     df['solid_angle'] = 2*np.pi*(1 - np.cos(df['angle'])) / (df['vx']**2 + df['vy']**2 + df['vz']**2)
 
     df.to_csv('testing_data.csv')
 
     print(df.head())
     print(df.describe())
-
-    #
-    #
-    # Defining Reflectance and Transmission as arrays 
-    #
-    #
-
-    # Issue saving and reading CSV file so will move this to its own file later
-
-    #delta_r = df['z'].max / 10
-
-    #print (delta_r)
-
-
-
-
-
-
-
 
 
 

@@ -1,8 +1,10 @@
 import numpy as np 
 import matplotlib.pyplot as plt
-import pandas as pd 
+import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
 
-df = pd.read_csv('testing_data.csv', engine='python')
+
+df = pd.read_csv('testing_data.csv', index_col=0, engine='python')
 
 #print (df.head())
 #print (df.describe())
@@ -35,8 +37,11 @@ print (delta_r *20)
 R_ir_vals = (R_ir + 0.5)*delta_r
 alpha_ia_vals = (alpha_ia + 0.5)*delta_alpha # extra term (1 - 0.5*delta_a*np.cot(delta_a/2))*(np.cot(i+0.5)*delta_a)
 
-d_reflectance = df[df['type'] == 2]
-d_transmittance = df[df['type'] == 4]
+d_reflectance = df[df['type'] == 2].reset_index(drop=True)
+d_transmittance = df[df['type'] == 4].reset_index(drop=True)
+#d_reflectance.reset_index(inplace=True)
+#d_reflectance.drop()
+
 
 
 # Converts the values 
@@ -46,12 +51,71 @@ d_reflectance_r = d_reflectance['r'].values
 d_transmittance_angle = d_transmittance['angle'].values
 d_transmittance_r = d_transmittance['r'].values
 
+# Finds which bin each element is in 
 d_refl_angle_bins = np.digitize(d_reflectance_angle, bins_alpha)
+d_refl_r_bins = np.digitize(d_reflectance_r, bins_r)
+d_trans_angle_bins = np.digitize(d_transmittance_angle, bins_alpha)
+d_trans_r_bins = np.digitize(d_transmittance_r, bins_r)
+
+print (bins_r)
+print (d_reflectance_r)
+print (type(d_refl_r_bins))
+
+d_transmittance['angle_bins'] = d_trans_angle_bins
+d_transmittance['r_bins'] = d_trans_r_bins
+d_reflectance['angle_bins'] = d_refl_angle_bins
+d_reflectance['r_bins'] = d_refl_r_bins
+
+print (d_transmittance.head(10))
+print (d_reflectance.head(10))
 
 
-print (bins_alpha)
-print (d_reflectance_angle)
-print (d_refl_angle_bins)
+d_transmittance_angle_array = np.zeros(N_grid)
+d_transmittance_r_array = np.zeros(N_grid)
+d_reflectance_angle_array = np.zeros(N_grid)
+d_reflectance_r_array = np.zeros(N_grid)
+
+weight = d_transmittance['angle_bins'][4]
+print ('________________________________________')
+print (weight)
+
+# Diffuse Transmittance with angle
+for i in range(len(d_transmittance)):
+    weight = d_transmittance.loc[i, 'weight']
+    index = d_transmittance.loc[i,'angle_bins']
+    d_transmittance_angle_array[index -1] += weight
+
+# Diffuse Transmittance with radius
+for i in range(len(d_transmittance)):
+    weight = d_transmittance.loc[i, 'weight']
+    index = d_transmittance.loc[i,'r_bins']
+    d_transmittance_r_array[index -1] += weight
+
+# Diffuse Reflection with Angle
+for i in range(len(d_reflectance)):
+    weight = d_reflectance.loc[i, 'weight']
+    index = d_reflectance.loc[i,'angle_bins']
+    d_reflectance_angle_array[index -1] += weight
+
+# Diffuse Reflection with radius
+for i in range(len(d_reflectance)):
+    weight = d_reflectance.loc[i, 'weight']
+    index = d_reflectance.loc[i,'r_bins']
+    d_reflectance_r_array[index -1] += weight
+
+
+plt.figure()
+plt.plot(alpha_ia_vals, d_reflectance_angle_array)
+plt.show()
+
+
+
+
+
+
+
+    
+
 
 
 
