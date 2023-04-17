@@ -85,7 +85,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 10000 # Number of photons
+    numberPhotons = 50000 # Number of photons
 
     names = ['x','y','z','vx','vy', 'vz', 'weight','type']
     photon_data = np.empty(len(names))

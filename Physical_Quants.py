@@ -8,7 +8,8 @@ df = pd.read_csv('testing_data.csv', index_col=0, engine='python')
 
 #print (df.head())
 #print (df.describe())
-
+# Number of photons 
+N = 50000
 #
 #
 # Defining Reflectance and Transmission as arrays 
@@ -24,6 +25,8 @@ delta_z = df['z'].max() / N_grid
 delta_r = df['r'].max() / N_grid
 delta_alpha = np.pi / (2*N_grid)
 
+
+
 # Optimal coordinates of the simulated quantities
 R_ir = np.arange(N_grid)
 alpha_ia = np.arange(N_grid)
@@ -36,6 +39,11 @@ print (delta_r *20)
 # See extra terms from Taylor exapansion to improve accuracy
 R_ir_vals = (R_ir + 0.5)*delta_r
 alpha_ia_vals = (alpha_ia + 0.5)*delta_alpha # extra term (1 - 0.5*delta_a*np.cot(delta_a/2))*(np.cot(i+0.5)*delta_a)
+
+# area and solid angle
+delta_a = 2*np.pi*(R_ir_vals) * delta_r # cm^2
+delta_omega = 4*np.pi*np.sin(alpha_ia_vals)*np.sin(delta_alpha/2) # sr
+
 
 d_reflectance = df[df['type'] == 2].reset_index(drop=True)
 d_transmittance = df[df['type'] == 4].reset_index(drop=True)
@@ -70,44 +78,62 @@ print (d_transmittance.head(10))
 print (d_reflectance.head(10))
 
 
-d_transmittance_angle_array = np.zeros(N_grid)
-d_transmittance_r_array = np.zeros(N_grid)
-d_reflectance_angle_array = np.zeros(N_grid)
-d_reflectance_r_array = np.zeros(N_grid)
+T_da = np.zeros(N_grid)
+T_dr = np.zeros(N_grid)
+R_da = np.zeros(N_grid)
+R_dr = np.zeros(N_grid)
 
-weight = d_transmittance['angle_bins'][4]
-print ('________________________________________')
-print (weight)
+
 
 # Diffuse Transmittance with angle
 for i in range(len(d_transmittance)):
     weight = d_transmittance.loc[i, 'weight']
     index = d_transmittance.loc[i,'angle_bins']
-    d_transmittance_angle_array[index -1] += weight
+    T_da[index -1] += weight
 
 # Diffuse Transmittance with radius
 for i in range(len(d_transmittance)):
     weight = d_transmittance.loc[i, 'weight']
     index = d_transmittance.loc[i,'r_bins']
-    d_transmittance_r_array[index -1] += weight
+    T_dr[index -1] += weight
 
 # Diffuse Reflection with Angle
 for i in range(len(d_reflectance)):
     weight = d_reflectance.loc[i, 'weight']
     index = d_reflectance.loc[i,'angle_bins']
-    d_reflectance_angle_array[index -1] += weight
+    R_da[index -1] += weight
 
 # Diffuse Reflection with radius
 for i in range(len(d_reflectance)):
     weight = d_reflectance.loc[i, 'weight']
     index = d_reflectance.loc[i,'r_bins']
-    d_reflectance_r_array[index -1] += weight
+    R_dr[index -1] += weight
+
+
+# Raw R_dr and T_dr are converted to probablities of reimission per unit unit area 
+R_dr = R_dr / (N*delta_a)
+T_dr = T_dr / (N*delta_a)
+
+
+# Raw R_da and T_da are converted to reimission per solid angle
+
+R_da = R_da / (N*delta_omega)
+T_da = T_da / (N*delta_omega)
+
+plt.figure()
+plt.ylabel('Diffuse Reflectance $sr^{-1}$')
+plt.xlabel('Exit angle (rad)')
+plt.plot(alpha_ia_vals, R_da, 'x')
+
 
 
 plt.figure()
-plt.plot(alpha_ia_vals, d_reflectance_angle_array)
-plt.show()
+plt.ylabel('Diffuse Transmission $sr^{-1}$')
+plt.xlabel('Exit angle (rad)')
+plt.plot(alpha_ia_vals, T_da, 'x')
 
+
+plt.show()
 
 
 
