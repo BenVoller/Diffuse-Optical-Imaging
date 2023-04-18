@@ -123,6 +123,7 @@ T_da = T_da / (N*delta_omega)
 plt.figure()
 plt.ylabel('Diffuse Reflectance $sr^{-1}$')
 plt.xlabel('Exit angle (rad)')
+plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
 plt.plot(alpha_ia_vals, R_da, 'x')
 
 
@@ -130,6 +131,7 @@ plt.plot(alpha_ia_vals, R_da, 'x')
 plt.figure()
 plt.ylabel('Diffuse Transmission $sr^{-1}$')
 plt.xlabel('Exit angle (rad)')
+plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
 plt.plot(alpha_ia_vals, T_da, 'x')
 
 

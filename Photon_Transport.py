@@ -273,8 +273,16 @@ class photons():
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
         delW = (self.mu_a / self.mu_t) * self.W
 
-        # Insert some call to adding the weigh to relative absorption
+        # Insert some call to adding the weigh to relative absorption 0 will refer to no absorption
+        if self.is_scattered:
+            # 2 refers to scattered absorption
+            self.absorbed_type = 2
 
+        elif not self.is_scattered:
+            # 1 refers to unscattered absoption
+            self.absorbed_type = 1
+
+        self.absorbed = delW
         self.W -= delW
 
 

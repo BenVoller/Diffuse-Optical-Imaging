@@ -16,6 +16,9 @@ def run(number):
     
     material = medium()
     photon = photons(material, weight=1)
+
+    absorption = np.zeros(5)
+    
     
 
     # Runs the photon trasnport for Monte Carlo photon transport 
@@ -47,19 +50,21 @@ def run(number):
             
         if photon.W == 0:
             
-            return photon.final
+            return photon.final, absorption
         
         photon.move()
         photon.absorb()
+
+        # Recording absorbtion for plotting Fluence [x,y,z,W,type]
+        temp_list = np.hstack((photon.pos, photon.absorbed, photon.absorbed_type))
+        absorption = np.vstack([absorption, temp_list])
         photon.scatter()
         photon.roulette()
        
-        
-    #final_pos = np.concatenate((photon.pos, photon.vel))
-    
-    
-    
-    return photon.final
+
+
+
+    return photon.final, absorption
 
 
 def SORS(df, xmin=0, width=0.001, r=0):
@@ -87,17 +92,21 @@ if __name__ == '__main__':
     n_cpu = mp.cpu_count()  # = 8 
     numberPhotons = 50000 # Number of photons
 
-    names = ['x','y','z','vx','vy', 'vz', 'weight','type']
+    names = ['x','y','z','vx','vy', 'vz', 'weight','type'] # names for the final pos of a photon 
+    absorbed_names = ['x', 'y', 'z', 'weight', 'absorbed_type'] # absorbed data names
     photon_data = np.empty(len(names))
+    absorbed_data = np.empty(len(absorbed_names))
+
 
     
     #  Linear computation for bugfixing
     for i in range(numberPhotons):
 
-        data = run(i)
+        data, absorbed = run(i)
         
 
         photon_data = np.vstack([photon_data, data])
+        absorbed_data = np.vstack([absorbed_data, absorbed])
 
     '''
     # create and configure the process pool
@@ -113,11 +122,23 @@ if __name__ == '__main__':
     
     print ('parallel time: ', t1 - t0)
 
+#    Define dataframes for better file storage
     df = pd.DataFrame(data=photon_data, columns=names)
-    df['type'] = df['type'].astype(int)
-    df.drop(0, inplace=True)
-    #df.drop(columns=0, inplace=True)
+    df_abs = pd.DataFrame(data=absorbed_data, columns=absorbed_names)
 
+    # sets the type to an integer
+    df['type'] = df['type'].astype(int)
+    df_abs['absorbed_type'] = df_abs['absorbed_type'].astype(int)
+
+    # Drops the fist row of zeros used to initialise the array
+    df.drop(0, inplace=True)
+    df_abs.drop(0, inplace=True)
+
+
+    # drop all the 0 vaued absorbed types as they are relics of initialisation
+    df_abs = df_abs[df_abs.absorbed_type != 0]
+    
+ 
     # Separates the unscattered trnasmission from the model. Tu:0, td:1, Ru:2, Rd:3, Ab:4
     
 
@@ -126,7 +147,22 @@ if __name__ == '__main__':
     df['angle'] = np.arccos(abs(df['vz']) / np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2))
     df['solid_angle'] = 2*np.pi*(1 - np.cos(df['angle'])) / (df['vx']**2 + df['vy']**2 + df['vz']**2)
 
+    # Defines the r value useful for fluence and also drops the x and y coords as they are no longer useful.
+    df_abs['r'] = np.sqrt(df_abs['x']**2 + df_abs['y']**2)
+    df_abs.drop('x', axis=1, inplace=True)
+    df_abs.drop('y', axis=1, inplace=True)
+    df_abs = df_abs.reindex(columns=['z', 'r', 'weight', 'absorbed_type']) # reorders the dataframe for neatness
+    df_abs = df_abs.reset_index(drop=True)  # resets index after dropping the 0 values
+
+    print ('_____')
+    print(df_abs.head())
+    print ('_____')
+
+
+    # Saving the Dataframes for use in a different file
     df.to_csv('testing_data.csv')
+
+    df_abs.to_csv('testing_absorbtion.csv')
 
     print(df.head())
     print(df.describe())
