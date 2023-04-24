@@ -81,17 +81,18 @@ def SORS(df, xmin=0, width=0.001, r=0):
 
 if __name__ == '__main__':
 
+    material = medium()
     # Begining time for the simulation
     t0 = time.time()
     n_cpu = mp.cpu_count()  # = 8 
-    numberPhotons = 1000 # Number of photons
+    numberPhotons = material.NumberPhotons # Number of photons
 
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
     N_grid = 20
 
-    material = medium()
+    
 
     # size of Grid elements
     delta_z = material.depth / N_grid
@@ -168,7 +169,7 @@ if __name__ == '__main__':
         
         z_bin = np.digitize(data['z'], bins_z)
         r_bin = np.digitize(data['r'], bins_r)
-        angle_bin = np.digitize(data['r'], bins_alpha)
+        angle_bin = np.digitize(data['angle'], bins_alpha)
 
 
         if data['exit_type'] == 1:
@@ -207,16 +208,43 @@ if __name__ == '__main__':
     
     print ('parallel time: ', t1 - t0)
 
-    r_transmittance = np.sum(diffuse_transmittance, axis=0)
-    angle_transmittance = np.sum(diffuse_transmittance, axis=1)
+    r_transmittance = np.sum(diffuse_transmittance, axis=1)
+    angle_transmittance = np.sum(diffuse_transmittance, axis=0)
 
-    r_reflectance = np.sum(diffuse_reflectance, axis=0)
-    angle_reflectance = np.sum(diffuse_reflectance, axis=1)
+    r_reflectance = np.sum(diffuse_reflectance, axis=1)
+    angle_reflectance = np.sum(diffuse_reflectance, axis=0)
 
     T_tot = np.sum(diffuse_transmittance)
     R_tot = np.sum(diffuse_reflectance)
 
     print (T_tot/numberPhotons, R_tot/numberPhotons)
 
+    # Raw R_dr and T_dr are converted to probablities of reimission per unit unit area 
+    R_dr = r_reflectance / (numberPhotons*delta_a)
+    T_dr = r_transmittance / (numberPhotons*delta_a)
+
+
+    # Raw R_da and T_da are converted to reimission per solid angle
+    R_da = angle_reflectance / (numberPhotons*delta_omega)
+    T_da = angle_transmittance / (numberPhotons*delta_omega)
+
+    images = True
+    if images == True:
+        plt.figure()
+        plt.ylabel('Diffuse Reflectance $sr^{-1}$')
+        plt.xlabel('Exit angle (rad)')
+        plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(alpha_ia_vals, R_da, 'x')
+
+        plt.figure()
+        plt.ylabel('Diffuse Transmission $sr^{-1}$')
+        plt.xlabel('Exit angle (rad)')
+        plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(alpha_ia_vals, T_da, 'x')
+
+        #print (df.head())
+        #plt.hist(d_transmittance['weight'], bins=d_transmittance['bins'])
+        plt.show()
+        
     
 
