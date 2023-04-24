@@ -259,7 +259,14 @@ class photons():
 
         self.pos.astype(float)
         self.W = np.float(self.W)
-        self.final = np.hstack((self.pos, self.vel, self.W, exit_type))
+        r = np.sqrt(self.pos[0]**2 + self.pos[1]**2)
+        angle = np.arccos(abs(self.vel[-1]) / np.sqrt(self.vel[0]**2 + self.vel[1]**2 + self.vel[2]**2))
+        self.final = np.hstack((self.pos[0], r, angle,  self.W, exit_type))
+        self.final = {'z':self.pos[2],
+                      'r':r,
+                      'angle':angle,
+                      'W':self.W,
+                      'exit_type':exit_type}
         self.W = 0 
 
 
@@ -274,7 +281,15 @@ class photons():
         delW = (self.mu_a / self.mu_t) * self.W
 
         # Insert some call to adding the weigh to relative absorption
+        if self.is_scattered:
+            # 2 refers to scattered absorption
+            self.absorbed_type = 2
 
+        elif not self.is_scattered:
+            # 1 refers to unscattered absoption
+            self.absorbed_type = 1
+        
+        self.absorbed = delW
         self.W -= delW
 
 
