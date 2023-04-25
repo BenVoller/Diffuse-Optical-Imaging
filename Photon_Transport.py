@@ -33,13 +33,12 @@ class photons():
 
         self.W = weight 
         
-       
-
-        self. layers = medium.layers
+    
+        self.layers = medium.layers
         
         
-        self.upper_bound = self.layers[2][0]
-        self.lower_bound = self.layers[0][0]
+        self.upper_bound = medium.depth
+        self.lower_bound = 0
 
         
      
@@ -256,18 +255,24 @@ class photons():
         elif self.pos[-1] == self.upper_bound and self.is_scattered:
             exit_type = 4 # Td
             #print('transmittance', self.transmittance)
+        
+        
+        try:
+            
+            self.pos.astype(float)
+            self.W = np.float(self.W)
+            r = np.sqrt(self.pos[0]**2 + self.pos[1]**2)
+            angle = np.arccos(abs(self.vel[-1]) / np.sqrt(self.vel[0]**2 + self.vel[1]**2 + self.vel[2]**2))
+            #self.final = np.hstack((self.pos[0], r, angle,  self.W, exit_type))
+            self.final = {'z':self.pos[2],
+                        'r':r,
+                        'angle':angle,
+                        'W':self.W,
+                        'exit_type':exit_type}
+            self.W = 0 
 
-        self.pos.astype(float)
-        self.W = np.float(self.W)
-        r = np.sqrt(self.pos[0]**2 + self.pos[1]**2)
-        angle = np.arccos(abs(self.vel[-1]) / np.sqrt(self.vel[0]**2 + self.vel[1]**2 + self.vel[2]**2))
-        self.final = np.hstack((self.pos[0], r, angle,  self.W, exit_type))
-        self.final = {'z':self.pos[2],
-                      'r':r,
-                      'angle':angle,
-                      'W':self.W,
-                      'exit_type':exit_type}
-        self.W = 0 
+        except:
+            print('Error', self.pos, self.vel, self.W)
 
 
 
@@ -339,7 +344,11 @@ class photons():
             if eta <= 1/m:
                 self.W = m*self.W
             else:
-                self.final = np.hstack([self.pos,self.vel, self.W, 5]) # 4 corresponds to Absorbed Ab
+                self.final = {'z':self.pos[2],
+                              'r':0,
+                              'angle':0,
+                              'W':self.W,
+                              'exit_type': 5} # 4 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
