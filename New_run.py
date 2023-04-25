@@ -17,7 +17,7 @@ def run(number):
     material = medium()
     photon = photons(material, weight=1)
 
-    absorption = np.zeros(5)
+    absorption = np.zeros(3)
     
 
     # Runs the photon trasnport for Monte Carlo photon transport 
@@ -42,7 +42,8 @@ def run(number):
         photon.move()
         photon.absorb()
 
-        temp_list = np.hstack((photon.pos, photon.absorbed, photon.absorbed_type))
+        # [z, W, type]
+        temp_list = np.hstack((photon.pos[-1], photon.absorbed, photon.absorbed_type))
         absorption = np.vstack([absorption, temp_list])
 
         photon.scatter()
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 20
+    N_grid = 200
 
     
 
@@ -150,83 +151,123 @@ if __name__ == '__main__':
     unscat_reflectance = 0
     unscat_transmittance = 0
 
-    Absorbtion = np.zeros(N_grid)
-
 
     
+    
+    scattered_absorbtion = np.zeros(N_grid)
+    unscattered_absorbtion = np.zeros(N_grid)
+    
+    absorbtion_weights = np.zeros(N_grid)
+
 
     names = ['z','r','angle', 'weight','type']
     photon_data = np.empty(len(names))
 
-    
+    '''
     #  Linear computation for bugfixing
     for i in range(numberPhotons):
         # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
         data, absorbtion = run(i)
-
-        # Assigns a bin number to the data so that the weight can be stored
-
-        
-        z_bin = np.digitize(data['z'], bins_z)
-        r_bin = np.digitize(data['r'], bins_r)
-        angle_bin = np.digitize(data['angle'], bins_alpha)
-
-
-        if data['exit_type'] == 1:
-            # Unscattered Refelctance
-            unscat_reflectance += data['W']
-
-
-        elif data['exit_type'] == 2:
-            # Diffuse Reflectance
-            diffuse_reflectance[r_bin-1][angle_bin-1] += data['W']
-
-        elif data['exit_type'] == 3:
-            # Unscattered Transmission
-            unscat_transmittance += data['W']
-
-
-        elif data['exit_type'] == 4:
-            # Diffuse Transmittance
-            diffuse_transmittance[r_bin-1][angle_bin-1] += data['W']
-        
-
-
-        # photon_data = np.vstack([photon_data, data])
-
     '''
-    # create and configure the process pool
+
+        # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        for result in pool.map(run, range(numberPhotons)):
-            photon_data = np.vstack([photon_data, result])
-    '''
+        for data, absorbtion in pool.map(run, range(numberPhotons)):
+            
+
+            # Assigns a bin number to the data so that the weight can be stored
+            z_bin = np.digitize(data['z'], bins_z)
+            r_bin = np.digitize(data['r'], bins_r)
+            angle_bin = np.digitize(data['angle'], bins_alpha)
+
+
+            # Absorbtion data
+            # Assigning bin values to the absorbtion data corresponding with absorbed z vals
+            
+
+
+            if data['exit_type'] == 1:
+                # Unscattered Refelctance
+                unscat_reflectance += data['W']
+
+
+            elif data['exit_type'] == 2:
+                # Diffuse Reflectance
+                diffuse_reflectance[r_bin-1][angle_bin-1] += data['W']
+
+            elif data['exit_type'] == 3:
+                # Unscattered Transmission
+                unscat_transmittance += data['W']
+
+            elif data['exit_type'] == 4:
+                # Diffuse Transmittance
+                diffuse_transmittance[r_bin-1][angle_bin-1] += data['W']
+            
+
+
+            # # # This splits the absorbtion into specific scattered or unscattered bins
+            
+            if absorbtion.ndim != 1:
+
+                # Absorbtion scattered or unscattered
+                for i in range(len(absorbtion)):
+                    
+                    absorbtion_z_bin = np.digitize(absorbtion[i], bins_z)
+
+                    if absorbtion[i][-1] == 1:
+                        # Unscattered Absorbtion
+                        unscattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+
+                    elif absorbtion[i][-1] == 2:
+                        # Scattered absorbtion
+                        scattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+
+                
+            
+            
+
+            absorbtion_weights += (scattered_absorbtion + unscattered_absorbtion)
+        
+            # photon_data = np.vstack([photon_data, data])
+
     
-    # process pool is closed automatically
+        
+        # process pool is closed automatically
 
-    t1 = time.time()
-    
-    print ('parallel time: ', t1 - t0)
+        t1 = time.time()
+        
+        print ('parallel time: ', t1 - t0)
 
-    r_transmittance = np.sum(diffuse_transmittance, axis=1)
-    angle_transmittance = np.sum(diffuse_transmittance, axis=0)
+        r_transmittance = np.sum(diffuse_transmittance, axis=1)
+        angle_transmittance = np.sum(diffuse_transmittance, axis=0)
 
-    r_reflectance = np.sum(diffuse_reflectance, axis=1)
-    angle_reflectance = np.sum(diffuse_reflectance, axis=0)
+        r_reflectance = np.sum(diffuse_reflectance, axis=1)
+        angle_reflectance = np.sum(diffuse_reflectance, axis=0)
 
-    T_tot = np.sum(diffuse_transmittance)
-    R_tot = np.sum(diffuse_reflectance)
+        T_tot = np.sum(diffuse_transmittance)
+        R_tot = np.sum(diffuse_reflectance)
 
-    print (T_tot/numberPhotons, R_tot/numberPhotons)
+        print (T_tot/numberPhotons, R_tot/numberPhotons)
 
-    # Raw R_dr and T_dr are converted to probablities of reimission per unit unit area 
-    R_dr = r_reflectance / (numberPhotons*delta_a)
-    T_dr = r_transmittance / (numberPhotons*delta_a)
+        # Raw R_dr and T_dr are converted to probablities of reimission per unit unit area 
+        R_dr = r_reflectance / (numberPhotons*delta_a)
+        T_dr = r_transmittance / (numberPhotons*delta_a)
 
 
-    # Raw R_da and T_da are converted to reimission per solid angle
-    R_da = angle_reflectance / (numberPhotons*delta_omega)
-    T_da = angle_transmittance / (numberPhotons*delta_omega)
+        # Raw R_da and T_da are converted to reimission per solid angle
+        R_da = angle_reflectance / (numberPhotons*delta_omega)
+        T_da = angle_transmittance / (numberPhotons*delta_omega)
+
+        # Convert raw absorbtion data to physical quantity
+        A_z = absorbtion_weights / numberPhotons * delta_z
+        Total_absorbtion = np.sum(A_z)
+
+
+        ### Fluence
+        Fluence_z = A_z / u_a_vals
+
+
 
     images = True
     if images == True:
@@ -241,6 +282,12 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
+
+        plt.figure()
+        plt.plot(Z_i_vals, Fluence_z, 'x')
+        plt.xlabel('z depth')
+        plt.ylabel('Fluence')
+
 
         #print (df.head())
         #plt.hist(d_transmittance['weight'], bins=d_transmittance['bins'])
