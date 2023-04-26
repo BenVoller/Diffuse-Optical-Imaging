@@ -225,9 +225,8 @@ if __name__ == '__main__':
 
                 
             
-            
-
-            absorbtion_weights += (scattered_absorbtion + unscattered_absorbtion)
+            #absorbtion_weights += (scattered_absorbtion + unscattered_absorbtion)
+            absorbtion_weights += scattered_absorbtion
         
             # photon_data = np.vstack([photon_data, data])
 
@@ -260,14 +259,14 @@ if __name__ == '__main__':
         T_da = angle_transmittance / (numberPhotons*delta_omega)
 
         # Convert raw absorbtion data to physical quantity
-        A_z = absorbtion_weights / numberPhotons * delta_z
+        A_z = absorbtion_weights / numberPhotons * delta_z * delta_a
         Total_absorbtion = np.sum(A_z)
 
 
         ### Fluence
         Fluence_z = A_z / u_a_vals
 
-
+    np.save('Fluence_data', Fluence_z)
 
     images = True
     if images == True:
