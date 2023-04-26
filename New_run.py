@@ -259,7 +259,7 @@ if __name__ == '__main__':
         T_da = angle_transmittance / (numberPhotons*delta_omega)
 
         # Convert raw absorbtion data to physical quantity
-        A_z = absorbtion_weights / numberPhotons * delta_z
+        A_z = absorbtion_weights / numberPhotons * delta_z * delta_a
         Total_absorbtion = np.sum(A_z)
 
 
