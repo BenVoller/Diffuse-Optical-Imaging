@@ -65,8 +65,65 @@ class medium():
         self.depth = self.layers_important[7][0]
 
        
+    def inclusion(self, size):
+
+        '''
+        Defines a square inclusion based on the layers defined in __init__
+        returns the 6 faces of the cube as '''
+
+        planes = [
+        {'normal': np.array([1, 0, 0]), 'point': np.array([-size/2, 0, 0]), 'face':'left'},  # left face
+        {'normal': np.array([-1, 0, 0]), 'point': np.array([size/2, 0, 0]), 'face':'right'},  # right face
+        {'normal': np.array([0, 1, 0]), 'point': np.array([0, -size/2, 0]), 'face':'back'},  # back face
+        {'normal': np.array([0, -1, 0]), 'point': np.array([0, size/2, 0]), 'face':'front'},  # front face
+        {'normal': np.array([0, 0, 1]), 'point': np.array([0, 0, -size/2]), 'face':'top'},  # front face
+        {'normal': np.array([0, 0, -1]), 'point': np.array([0, 0, size/2]), 'face':'bottom'}   # back face
+        ]
+
+        return planes
+
+
+
         
 
+    def find_collision_distance(self, planes, position, velocity, cube_side_length):
+        # Normalize velocity vector to get direction
+        direction = velocity / np.linalg.norm(velocity)
+        
+        
+        # Find distances to each plane
+        distances = []
+        faces = []
+        for plane in planes:
+            numerator = np.dot(plane['normal'], (plane['point'] - position))
+            denominator = np.dot(plane['normal'], direction)
+            if denominator != 0:
+                distance = numerator / denominator
+                if distance > 0:
+                    distances.append(distance)
+                    faces.append(plane['face'])
+        
+        # Return the minimum distance
+        if distances:
+            index = np.argmin(distances)
+            face = faces[index]
+            return min(distances), face
+            
+        else:
+            return None, None
+
+    
+
+
+    '''
+    collision_distance, face = find_collision_distance(position, velocity, cube_side_length)
+
+    if collision_distance is not None:
+        print(f"The photon will collide with the {face} face of the cube at a distance of {collision_distance} units.")
+    else:
+        print("The photon will not collide with any face of the cube.")
+    '''   
+        
 
     
     
