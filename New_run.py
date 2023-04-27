@@ -91,7 +91,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 200
+    N_grid = 100
 
     
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
             r_bin = np.digitize(data['r'], bins_r)
             angle_bin = np.digitize(data['angle'], bins_alpha)
 
-
+               
             # Absorbtion data
             # Assigning bin values to the absorbtion data corresponding with absorbed z vals
             
@@ -211,17 +211,17 @@ if __name__ == '__main__':
             if absorbtion.ndim != 1:
 
                 # Absorbtion scattered or unscattered
-                for i in range(len(absorbtion)):
+                for i in range(len(absorbtion)):    
                     
-                    absorbtion_z_bin = np.digitize(absorbtion[i], bins_z)
-
+                    absorbtion_z_bin = np.digitize(absorbtion[i][0], bins_z)
+                    
                     if absorbtion[i][-1] == 1:
                         # Unscattered Absorbtion
-                        unscattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+                        unscattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
 
                     elif absorbtion[i][-1] == 2:
                         # Scattered absorbtion
-                        scattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+                        scattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
 
                 
             
@@ -259,7 +259,7 @@ if __name__ == '__main__':
         T_da = angle_transmittance / (numberPhotons*delta_omega)
 
         # Convert raw absorbtion data to physical quantity
-        A_z = absorbtion_weights / numberPhotons * delta_z * delta_a
+        A_z = absorbtion_weights / numberPhotons * delta_z 
         Total_absorbtion = np.sum(A_z)
 
 
@@ -270,6 +270,7 @@ if __name__ == '__main__':
 
     images = True
     if images == True:
+        '''
         plt.figure()
         plt.ylabel('Diffuse Reflectance $sr^{-1}$')
         plt.xlabel('Exit angle (rad)')
@@ -281,7 +282,7 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
-
+        '''
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
         plt.xlabel('z depth')
