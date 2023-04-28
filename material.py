@@ -8,12 +8,12 @@ class medium():
         # refractive indexes
 
         self.NumberPhotons = 100000
-        '''
+        
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.5, 1.37, 0.1, 100, 0.9]
-        layer2 = [1, 1.37, 0.1, 100, 0.9]
+        layer1 = [0.5, 1.0, 0.1, 100, 0.9]
+        layer2 = [1, 1.0, 0.1, 100, 0.9]
         layer3 = [999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -63,9 +63,9 @@ class medium():
         
 
         self.depth = self.layers_important[7][0]
-
+        '''
     
-    def inclusion(self, size):
+    def inclusion(self, size, centre_depth):
 
         '''
         Defines a square inclusion based on the layers defined in __init__
@@ -76,9 +76,13 @@ class medium():
         {'normal': np.array([-1, 0, 0]), 'point': np.array([size/2, 0, 0]), 'face':'right'},  # right face
         {'normal': np.array([0, 1, 0]), 'point': np.array([0, -size/2, 0]), 'face':'back'},  # back face
         {'normal': np.array([0, -1, 0]), 'point': np.array([0, size/2, 0]), 'face':'front'},  # front face
-        {'normal': np.array([0, 0, 1]), 'point': np.array([0, 0, -size/2]), 'face':'top'},  # front face
-        {'normal': np.array([0, 0, -1]), 'point': np.array([0, 0, size/2]), 'face':'bottom'}   # back face
+        {'normal': np.array([0, 0, 1]), 'point': np.array([0, 0, -size/2]), 'face':'top'},  # top face
+        {'normal': np.array([0, 0, -1]), 'point': np.array([0, 0, size/2]), 'face':'bottom'}   # bottom face
         ]
+
+        for plane in planes:
+            plane['point'][-1] -= centre_depth
+
 
         return planes
 
