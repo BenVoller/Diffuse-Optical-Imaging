@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 100000
+        self.NumberPhotons = 10000
         
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
@@ -24,6 +24,9 @@ class medium():
         
         self.layers_important = {0:layer1,
                                  1:layer2}
+        
+        # [depth, refractive_index(n), u_a, u_s, g]
+        self.inlcusion_properties = [0,1,0.1,100,0.9]
         self.depth = 1
         '''
         # [depth, refractive_index(n), u_a, u_s, g]
@@ -83,8 +86,12 @@ class medium():
         for plane in planes:
             plane['point'][-1] -= centre_depth
 
+        inclusion_layer = False
+        for i in range(len(self.layers_important)):
+            if self.important[i][0] > centre_depth and not inclusion_layer:
+                inclusion_layer = i
 
-        return planes
+        return planes, inclusion_layer
 
 
 

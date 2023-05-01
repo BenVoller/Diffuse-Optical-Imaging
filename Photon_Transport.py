@@ -11,7 +11,7 @@ np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, medium, weight):
+    def __init__(self, medium,inclusion_size, inclusion_centre_depth, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
         # These will record the values used to analyse the validity of the solver
@@ -41,8 +41,11 @@ class photons():
         self.lower_bound = 0
 
         
-     
-
+        # Defines the planes of the inclusion as a list of dictionaries
+        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_centre_depth)
+        # Denotes if the photon is within the inclusion
+        self.in_inclusion = False
+        
 
 
         # Psuedo Random Number for the step size of the photon movement
@@ -54,10 +57,52 @@ class photons():
         
         self.s_ = -np.log(self.eta())
 
+    def Coefficient_check(self):
+        # Defines whether the photon packet is within the inclusion
+        # saves time in checking for boundaries.
+
+        # Calls the original Refractive index function
+        self.Refractive_index(self)
+
+        inclusion_dist, self.face = medium.find_collision_distance(self.inclusion, self.pos, self.vel)
+        if inclusion_dist < self.db:
+            self.db = inclusion_dist
+            self.nt = medium.inclusion_properties[1]
+            self.mu_a = medium.inclusion_properties[2]
+            self.mu_a = medium.inclusion_properties[3]
+            self.g = medium.inclusion_properties[4]
+
+            self.rotate_axis == True
+
+        else:
+            self.rotate_axis == False
+        
+            
+                
+
+
+    def axis_rotation(self):
+
+        pos= self.pos
+        vel= self.vel
+
+        if self.face == 'left' or self.face == 'right':
+            # rotates to zxy
+            self.pos = np.array([pos[2],pos[0],pos[1]], dtype=float)
+            self.vel = np.array([vel[2],vel[0],vel[1]], dtype=float)
+            
+        elif self.face == 'back' or self.face == 'front':
+            self.pos = np.array([pos[1],pos[2],pos[0]], dtype=float)
+            self.vel = np.array([vel[1],vel[2],vel[0]], dtype=float)
+
+        
+        
+
         
 
     def Refractive_index(self):
 
+        
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
@@ -72,7 +117,7 @@ class photons():
         for i in range(-1,len(self.layers)):
 
             self.current_coeffs = self.layers[i]
-
+            self.layer_index =  i
             self.mu_a = self.layers[i][2]
             self.mu_s = self.layers[i][3]
             self.g = self.layers[i][4]
@@ -133,7 +178,7 @@ class photons():
                 break
 
             
-
+    
 
 
     def hit_boundary(self):

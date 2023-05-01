@@ -15,7 +15,7 @@ def run(number):
         print (number)
     
     material = medium()
-    photon = photons(material, weight=1)
+    photon = photons(material,inclusion_size=0.5, inclusion_centre_depth=0.75, weight=1)
 
     absorption = np.zeros(3)
     
@@ -24,16 +24,24 @@ def run(number):
     while photon.alive:
         
         photon.stepSize()
-        photon.Refractive_index()
+        
+        photon.Coefficient_check()
+        
 
         if not photon.is_scattered:
             # Only true if the photon hasnt moved yet and also 
             photon.fresnelReflection() 
 
         while photon.hit_boundary():
-    
-            photon.transmission()
-            photon.Refractive_index()
+            
+            if photon.rotate_axis == True:
+                # Rotates th frame of referecne then performs a transmission
+                # for the vertical faces
+                photon.axis_rotation()
+            else:
+                photon.transmission()
+
+            photon.Coefficient_check()
        
         if photon.W == 0:
             
