@@ -43,6 +43,7 @@ class photons():
         
         # Defines the planes of the inclusion as a list of dictionaries
         self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_centre_depth)
+        self.inclusion_properties = medium.inclusion_properties
         # Denotes if the photon is within the inclusion
         self.in_inclusion = False
         
@@ -62,20 +63,20 @@ class photons():
         # saves time in checking for boundaries.
 
         # Calls the original Refractive index function
-        self.Refractive_index(self)
+        self.Refractive_index()
 
-        inclusion_dist, self.face = medium.find_collision_distance(self.inclusion, self.pos, self.vel)
+        inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
         if inclusion_dist < self.db:
             self.db = inclusion_dist
-            self.nt = medium.inclusion_properties[1]
-            self.mu_a = medium.inclusion_properties[2]
-            self.mu_a = medium.inclusion_properties[3]
-            self.g = medium.inclusion_properties[4]
+            self.nt = self.inclusion_properties[1]
+            self.mu_a = self.inclusion_properties[2]
+            self.mu_a = self.inclusion_properties[3]
+            self.g = self.inclusion_properties[4]
 
-            self.rotate_axis == True
+            self.rotate_axis = True
 
         else:
-            self.rotate_axis == False
+            self.rotate_axis = False
         
             
                 
@@ -87,16 +88,34 @@ class photons():
         vel= self.vel
 
         if self.face == 'left' or self.face == 'right':
+            # Changes the coordinate system for transmission then returns it
             # rotates to zxy
-            self.pos = np.array([pos[2],pos[0],pos[1]], dtype=float)
-            self.vel = np.array([vel[2],vel[0],vel[1]], dtype=float)
+            self.pos = np.array([-pos[2],pos[1],pos[0]], dtype=float)
+            self.vel = np.array([-vel[2],vel[1],vel[0]], dtype=float)
+
+            self.transmission()
+
+            self.pos = np.array([pos[2],pos[1],-pos[0]], dtype=float)
+            self.vel = np.array([vel[2],vel[1],-vel[0]], dtype=float)
+
+
             
         elif self.face == 'back' or self.face == 'front':
-            self.pos = np.array([pos[1],pos[2],pos[0]], dtype=float)
-            self.vel = np.array([vel[1],vel[2],vel[0]], dtype=float)
+            # Changes the coordinate system for transmission then returns it
+            self.pos = np.array([pos[0],pos[2],-pos[1]], dtype=float)
+            self.vel = np.array([vel[0],vel[2],-vel[1]], dtype=float)
+
+            self.transmission()
+
+            self.pos = np.array([pos[0],-pos[2],pos[1]], dtype=float)
+            self.vel = np.array([vel[0],-vel[2],vel[1]], dtype=float)
+
+
 
         
         
+
+
 
         
 

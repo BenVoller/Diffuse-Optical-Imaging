@@ -26,7 +26,9 @@ class medium():
                                  1:layer2}
         
         # [depth, refractive_index(n), u_a, u_s, g]
-        self.inlcusion_properties = [0,1,0.1,100,0.9]
+        self.inclusion_properties = [0,1,0.1,100,0.9]
+        
+        #self.inclusion_layer = 0
         self.depth = 1
         '''
         # [depth, refractive_index(n), u_a, u_s, g]
@@ -88,7 +90,7 @@ class medium():
 
         inclusion_layer = False
         for i in range(len(self.layers_important)):
-            if self.important[i][0] > centre_depth and not inclusion_layer:
+            if self.layers_important[i][0] > centre_depth and not inclusion_layer:
                 inclusion_layer = i
 
         return planes, inclusion_layer
@@ -97,7 +99,7 @@ class medium():
 
         
 
-    def find_collision_distance(self, planes, position, velocity, cube_side_length):
+    def find_collision_distance(self, planes, position, velocity):
         # Normalize velocity vector to get direction
         direction = velocity / np.linalg.norm(velocity)
         
@@ -121,7 +123,7 @@ class medium():
             return min(distances), face
             
         else:
-            return None, None
+            return 99999999, None
 
     
 
