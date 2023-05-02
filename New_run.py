@@ -15,7 +15,11 @@ def run(number):
         print (number)
     
     material = medium()
-    photon = photons(material,inclusion_size=0.2, inclusion_centre_depth=0.6, weight=1)
+    
+    photon = photons(material,
+                     inclusion_size=material.inclusion_size, 
+                     inclusion_centre_depth=material.inclusion_depth, 
+                     weight=1)
 
     absorption = np.zeros(3)
     
@@ -43,6 +47,9 @@ def run(number):
                 
             else:
                 photon.transmission()
+
+            
+                
 
             photon.Coefficient_check()
         

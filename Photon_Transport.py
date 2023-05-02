@@ -61,25 +61,29 @@ class photons():
     def Coefficient_check(self):
         # Defines whether the photon packet is within the inclusion
         # saves time in checking for boundaries.
-
+        
         # Calls the original Refractive index function
+        print('Before RI', self.pos, self.vel)
         self.Refractive_index()
+        print ('After RI', self.pos, self.vel)
         
 
         inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
         if inclusion_dist < self.db and not self.exiting:
-            '''print (self.pos, self.vel, self.W)
+            '''
+            print (self.pos, self.vel, self.W)
             print (self.current_coeffs)
             print (self.exiting)
             print (inclusion_dist, '<', self.db)
             print ('----', self.inclusion_properties)
             '''
+            
             self.db = inclusion_dist
             self.nt = self.inclusion_properties[1]
             self.mu_a = self.inclusion_properties[2]
             self.mu_a = self.inclusion_properties[3]
             self.g = self.inclusion_properties[4]
-
+            
             self.rotate_axis = True
 
         else:
@@ -109,15 +113,19 @@ class photons():
 
             
         elif self.face == 'back' or self.face == 'front':
+            print ('before', self.pos, self.vel)
             # Changes the coordinate system for transmission then returns it
             self.pos = np.array([pos[0],pos[2],-pos[1]], dtype=float)
             self.vel = np.array([vel[0],vel[2],-vel[1]], dtype=float)
-
+            
             self.transmission()
 
             self.pos = np.array([pos[0],-pos[2],pos[1]], dtype=float)
             self.vel = np.array([vel[0],-vel[2],vel[1]], dtype=float)
-
+            print('after', self.pos, self.vel)
+        else:
+            print ('It is getting here')
+            self.transmission()
 
 
         
@@ -287,7 +295,7 @@ class photons():
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            print ('HERE')
+            #print ('HERE')
             self.photon_exit()
             
           
