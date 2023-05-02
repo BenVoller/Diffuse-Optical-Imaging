@@ -64,9 +64,16 @@ class photons():
 
         # Calls the original Refractive index function
         self.Refractive_index()
+        
 
         inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
-        if inclusion_dist < self.db:
+        if inclusion_dist < self.db and not self.exiting:
+            '''print (self.pos, self.vel, self.W)
+            print (self.current_coeffs)
+            print (self.exiting)
+            print (inclusion_dist, '<', self.db)
+            print ('----', self.inclusion_properties)
+            '''
             self.db = inclusion_dist
             self.nt = self.inclusion_properties[1]
             self.mu_a = self.inclusion_properties[2]
@@ -76,6 +83,7 @@ class photons():
             self.rotate_axis = True
 
         else:
+            
             self.rotate_axis = False
         
             
@@ -279,7 +287,7 @@ class photons():
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
-            #print ('HERE')
+            print ('HERE')
             self.photon_exit()
             
           
@@ -348,7 +356,8 @@ class photons():
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
         delW = (self.mu_a / self.mu_t) * self.W
-
+        
+        
         # Insert some call to adding the weigh to relative absorption
         if self.is_scattered:
             # 2 refers to scattered absorption
@@ -404,9 +413,10 @@ class photons():
 
         if self.W < 0.0001:
             eta = self.eta()
+           
 
             if eta <= 1/m:
-                self.W = m*self.W
+                self.W += m*self.W
             else:
                 self.final = {'z':self.pos[2],
                               'r':0,

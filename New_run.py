@@ -15,12 +15,13 @@ def run(number):
         print (number)
     
     material = medium()
-    photon = photons(material,inclusion_size=0.5, inclusion_centre_depth=0.75, weight=1)
+    photon = photons(material,inclusion_size=0.2, inclusion_centre_depth=0.6, weight=1)
 
     absorption = np.zeros(3)
     
 
     # Runs the photon trasnport for Monte Carlo photon transport 
+    #print ('NEW PHOTON')
     while photon.alive:
         
         photon.stepSize()
@@ -34,28 +35,34 @@ def run(number):
 
         while photon.hit_boundary():
             
+            
             if photon.rotate_axis == True:
                 # Rotates th frame of referecne then performs a transmission
                 # for the vertical faces
                 photon.axis_rotation()
+                
             else:
                 photon.transmission()
 
             photon.Coefficient_check()
-       
+        
         if photon.W == 0:
             
             return photon.final, absorption
-        
+        #print ('*weight',photon.W)
         photon.move()
+        
         photon.absorb()
+        
 
         # [z, W, type]
         temp_list = np.hstack((photon.pos[-1], photon.absorbed, photon.absorbed_type))
         absorption = np.vstack([absorption, temp_list])
 
+       # print ('weight&', photon.W)
         photon.scatter()
         photon.roulette()
+        
        
         
     #final_pos = np.concatenate((photon.pos, photon.vel))
@@ -171,18 +178,19 @@ if __name__ == '__main__':
     names = ['z','r','angle', 'weight','type']
     photon_data = np.empty(len(names))
 
-    '''
-    #  Linear computation for bugfixing
-    for i in range(numberPhotons):
-        # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
-        data, absorbtion = run(i)
-    '''
+   
 
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        for data, absorbtion in pool.map(run, range(numberPhotons)):
-            
+        # for data, absorbtion in pool.map(run, range(numberPhotons)):
+        
+         
+        #  Linear computation for bugfixing
+        for i in range(numberPhotons):
+            # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
+            data, absorbtion = run(i)
+        
 
             # Assigns a bin number to the data so that the weight can be stored
             z_bin = np.digitize(data['z'], bins_z)
@@ -278,7 +286,7 @@ if __name__ == '__main__':
 
     images = True
     if images == True:
-        '''
+        
         plt.figure()
         plt.ylabel('Diffuse Reflectance $sr^{-1}$')
         plt.xlabel('Exit angle (rad)')
@@ -290,7 +298,7 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
-        '''
+        
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
         plt.xlabel('z depth')
