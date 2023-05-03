@@ -308,7 +308,66 @@ class photons():
             self.vel = np.array([u_x, u_y, u_z])
             
 
-            
+    def transmission_y_plane(self):
+        alpha_i = np.arccos(abs(self.vel[0]))
+        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+
+        # Check if the photon is reflected if alpha_i is greater than the critical angle
+        if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
+            Ri = 1
+        elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
+            Ri = 0
+
+        else: 
+            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+            # be randomly polarised
+            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+
+        # Now check is the photon packet is reflected or transmitted. 
+        if self.eta() <= Ri:
+            # Reverses the z direction of the photon packet.
+            self.vel[0] = -self.vel[0]
+          
+        else:
+            # The photon is refracted according to Snells Law
+            u_x = np.float(np.sign(self.vel[0]) * np.cos(alpha_t))
+            u_y = np.float(self.vel[1] * self.ni / self.nt)
+            u_z = np.float(self.vel[2] * self.ni / self.nt)
+
+            self.vel = np.array([u_x, u_y, u_z])
+
+
+    def transmission_x_plane(self):
+        alpha_i = np.arccos(abs(self.vel[1]))
+        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+
+        # Check if the photon is reflected if alpha_i is greater than the critical angle
+        if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
+            Ri = 1
+        elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
+            Ri = 0
+
+        else: 
+            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+            # be randomly polarised
+            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+
+        # Now check is the photon packet is reflected or transmitted. 
+        if self.eta() <= Ri:
+            # Reverses the z direction of the photon packet.
+            self.vel[1] = -self.vel[1]
+          
+        else:
+            # The photon is refracted according to Snells Law
+            u_x =  np.float(self.vel[0] * self.ni / self.nt)
+            u_y = np.float(np.sign(self.vel[1]) * np.cos(alpha_t))
+            u_z = np.float(self.vel[2] * self.ni / self.nt)
+
+            self.vel = np.array([u_x, u_y, u_z])
+
+
 
         
 
