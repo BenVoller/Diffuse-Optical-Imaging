@@ -63,9 +63,15 @@ class photons():
         # saves time in checking for boundaries.
         
         # Calls the original Refractive index function
-        print('Before RI', self.pos, self.vel)
+        
         self.Refractive_index()
-        print ('After RI', self.pos, self.vel)
+        
+
+        if self.in_inclusion:
+            self.ni = self.inclusion_properties[1]
+            self.mu_a = self.inclusion_properties[2]
+            self.mu_a = self.inclusion_properties[3]
+            self.g = self.inclusion_properties[4]
         
 
         inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
@@ -77,18 +83,11 @@ class photons():
             print (inclusion_dist, '<', self.db)
             print ('----', self.inclusion_properties)
             '''
-            
             self.db = inclusion_dist
             self.nt = self.inclusion_properties[1]
-            self.mu_a = self.inclusion_properties[2]
-            self.mu_a = self.inclusion_properties[3]
-            self.g = self.inclusion_properties[4]
             
-            self.rotate_axis = True
-
-        else:
             
-            self.rotate_axis = False
+        
         
             
                 

@@ -39,17 +39,16 @@ def run(number):
 
         while photon.hit_boundary():
             
+            try:
+                if photon.faces == 'front' or photon.faces == 'back':
+                    photon.transmission_x_plane()
+
+                elif photon.faces == 'left' or photon.faces == 'right':
+                    photon.transmission_y_plane()
             
-            if photon.rotate_axis == True:
-                # Rotates th frame of referecne then performs a transmission
-                # for the vertical faces
-                photon.axis_rotation()
-                
-            else:
+            except:
                 photon.transmission()
 
-            
-                
 
             photon.Coefficient_check()
         
