@@ -8,23 +8,34 @@ class medium():
         # refractive indexes
 
         self.NumberPhotons = 10000
-        '''
+    
+        
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.5, 1.37, 0.1, 100, 0.9]
-        layer2 = [1, 1.37, 0.1, 100, 0.9]
-        layer3 = [999.9, 1, 1, 1, 0]
+        layer1 = [0.009, 1.0, 10, 90, 0.9]
+        layer2 = [0.015, 1.0, 10, 90, 0.9]
+        layer3 = [0.02, 1.0, 10, 90, 0.9]
+        layer4 = [999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
                        0:layer0,
                        1:layer1,
                        2:layer2,
-                       3:layer3}
+                       3:layer3,
+                       4:layer4}
         
         self.layers_important = {0:layer1,
-                                 1:layer2}
-        self.depth = 1
+                                 1:layer2,
+                                 2:layer3}
+        
+        # [depth, refractive_index(n), u_a, u_s, g]
+        self.inclusion_depth = 0.012
+        self.inclusion_size = 0.003
+        self.inclusion_properties = [self.inclusion_depth,1,10,90,0.9]
+        
+        #self.inclusion_layer = 0
+        self.depth = 0.02
         '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
@@ -63,10 +74,75 @@ class medium():
         
 
         self.depth = self.layers_important[7][0]
+        '''
+    
+    def inclusion(self, size, centre_depth):
 
-       
+        '''
+        Defines a square inclusion based on the layers defined in __init__
+        returns the 6 faces of the cube as '''
+
+        planes = [
+        {'normal': np.array([1, 0, 0]), 'point': np.array([-size/2, 0, 0]), 'face':'left'},  # left face
+        {'normal': np.array([-1, 0, 0]), 'point': np.array([size/2, 0, 0]), 'face':'right'},  # right face
+        {'normal': np.array([0, 1, 0]), 'point': np.array([0, -size/2, 0]), 'face':'back'},  # back face
+        {'normal': np.array([0, -1, 0]), 'point': np.array([0, size/2, 0]), 'face':'front'},  # front face
+        {'normal': np.array([0, 0, 1]), 'point': np.array([0, 0, -size/2]), 'face':'top'},  # top face
+        {'normal': np.array([0, 0, -1]), 'point': np.array([0, 0, size/2]), 'face':'bottom'}   # bottom face
+        ]
+
+        for plane in planes:
+            plane['point'][-1] -= centre_depth
+
+        inclusion_layer = False
+        for i in range(len(self.layers_important)):
+            if self.layers_important[i][0] > centre_depth and not inclusion_layer:
+                inclusion_layer = i
+
+        return planes, inclusion_layer
+
+
+
         
 
+    def find_collision_distance(self, planes, position, velocity):
+        # Normalize velocity vector to get direction
+        direction = velocity / np.linalg.norm(velocity)
+        
+        
+        # Find distances to each plane
+        distances = []
+        faces = []
+        for plane in planes:
+            numerator = np.dot(plane['normal'], (plane['point'] - position))
+            denominator = np.dot(plane['normal'], direction)
+            if denominator != 0:
+                distance = numerator / denominator
+                if distance > 0:
+                    distances.append(distance)
+                    faces.append(plane['face'])
+        
+        # Return the minimum distance
+        if distances:
+            index = np.argmin(distances)
+            face = faces[index]
+            return min(distances), face
+            
+        else:
+            return 99999999, None
+
+    
+
+
+    '''
+    collision_distance, face = find_collision_distance(position, velocity, cube_side_length)
+
+    if collision_distance is not None:
+        print(f"The photon will collide with the {face} face of the cube at a distance of {collision_distance} units.")
+    else:
+        print("The photon will not collide with any face of the cube.")
+    '''   
+        
 
     
     

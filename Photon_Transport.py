@@ -11,7 +11,7 @@ np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, medium, weight):
+    def __init__(self, medium,inclusion_size, inclusion_centre_depth, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
         # These will record the values used to analyse the validity of the solver
@@ -41,8 +41,12 @@ class photons():
         self.lower_bound = 0
 
         
-     
-
+        # Defines the planes of the inclusion as a list of dictionaries
+        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_centre_depth)
+        self.inclusion_properties = medium.inclusion_properties
+        # Denotes if the photon is within the inclusion
+        self.in_inclusion = False
+        
 
 
         # Psuedo Random Number for the step size of the photon movement
@@ -54,10 +58,85 @@ class photons():
         
         self.s_ = -np.log(self.eta())
 
+    def Coefficient_check(self):
+        # Defines whether the photon packet is within the inclusion
+        # saves time in checking for boundaries.
+        
+        # Calls the original Refractive index function
+        
+        self.Refractive_index()
+        
+
+        if self.in_inclusion:
+            self.ni = self.inclusion_properties[1]
+            self.mu_a = self.inclusion_properties[2]
+            self.mu_a = self.inclusion_properties[3]
+            self.g = self.inclusion_properties[4]
+        
+
+        inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
+        if inclusion_dist < self.db and not self.exiting:
+            '''
+            print (self.pos, self.vel, self.W)
+            print (self.current_coeffs)
+            print (self.exiting)
+            print (inclusion_dist, '<', self.db)
+            print ('----', self.inclusion_properties)
+            '''
+            self.db = inclusion_dist
+            self.nt = self.inclusion_properties[1]
+            
+            
+        
+        
+            
+                
+
+
+    def axis_rotation(self):
+
+        pos= self.pos
+        vel= self.vel
+
+        if self.face == 'left' or self.face == 'right':
+            # Changes the coordinate system for transmission then returns it
+            # rotates to zxy
+            self.pos = np.array([-pos[2],pos[1],pos[0]], dtype=float)
+            self.vel = np.array([-vel[2],vel[1],vel[0]], dtype=float)
+
+            self.transmission()
+
+            self.pos = np.array([pos[2],pos[1],-pos[0]], dtype=float)
+            self.vel = np.array([vel[2],vel[1],-vel[0]], dtype=float)
+
+
+            
+        elif self.face == 'back' or self.face == 'front':
+            print ('before', self.pos, self.vel)
+            # Changes the coordinate system for transmission then returns it
+            self.pos = np.array([pos[0],pos[2],-pos[1]], dtype=float)
+            self.vel = np.array([vel[0],vel[2],-vel[1]], dtype=float)
+            
+            self.transmission()
+
+            self.pos = np.array([pos[0],-pos[2],pos[1]], dtype=float)
+            self.vel = np.array([vel[0],-vel[2],vel[1]], dtype=float)
+            print('after', self.pos, self.vel)
+        else:
+            print ('It is getting here')
+            self.transmission()
+
+
+        
+        
+
+
+
         
 
     def Refractive_index(self):
 
+        
         # Returns a postive or negative number based on the direction of the photon
         direction = np.sign(self.vel[-1])
         z = self.pos[-1]
@@ -72,7 +151,7 @@ class photons():
         for i in range(-1,len(self.layers)):
 
             self.current_coeffs = self.layers[i]
-
+            self.layer_index =  i
             self.mu_a = self.layers[i][2]
             self.mu_s = self.layers[i][3]
             self.g = self.layers[i][4]
@@ -133,7 +212,7 @@ class photons():
                 break
 
             
-
+    
 
 
     def hit_boundary(self):
@@ -228,7 +307,66 @@ class photons():
             self.vel = np.array([u_x, u_y, u_z])
             
 
-            
+    def transmission_y_plane(self):
+        alpha_i = np.arccos(abs(self.vel[0]))
+        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+
+        # Check if the photon is reflected if alpha_i is greater than the critical angle
+        if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
+            Ri = 1
+        elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
+            Ri = 0
+
+        else: 
+            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+            # be randomly polarised
+            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+
+        # Now check is the photon packet is reflected or transmitted. 
+        if self.eta() <= Ri:
+            # Reverses the z direction of the photon packet.
+            self.vel[0] = -self.vel[0]
+          
+        else:
+            # The photon is refracted according to Snells Law
+            u_x = np.float(np.sign(self.vel[0]) * np.cos(alpha_t))
+            u_y = np.float(self.vel[1] * self.ni / self.nt)
+            u_z = np.float(self.vel[2] * self.ni / self.nt)
+
+            self.vel = np.array([u_x, u_y, u_z])
+
+
+    def transmission_x_plane(self):
+        alpha_i = np.arccos(abs(self.vel[1]))
+        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+
+        # Check if the photon is reflected if alpha_i is greater than the critical angle
+        if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
+            Ri = 1
+        elif alpha_i == 0 and alpha_t == 0:
+            # Fixes a Runtime error in the Reflection amount
+            Ri = 0
+
+        else: 
+            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+            # be randomly polarised
+            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+
+        # Now check is the photon packet is reflected or transmitted. 
+        if self.eta() <= Ri:
+            # Reverses the z direction of the photon packet.
+            self.vel[1] = -self.vel[1]
+          
+        else:
+            # The photon is refracted according to Snells Law
+            u_x =  np.float(self.vel[0] * self.ni / self.nt)
+            u_y = np.float(np.sign(self.vel[1]) * np.cos(alpha_t))
+            u_z = np.float(self.vel[2] * self.ni / self.nt)
+
+            self.vel = np.array([u_x, u_y, u_z])
+
+
 
         
 
@@ -284,7 +422,8 @@ class photons():
     def absorb(self):
         # Once a photon packet reaches an interaction site a fraction of it is absorbed 
         delW = (self.mu_a / self.mu_t) * self.W
-
+        
+        
         # Insert some call to adding the weigh to relative absorption
         if self.is_scattered:
             # 2 refers to scattered absorption
@@ -340,9 +479,10 @@ class photons():
 
         if self.W < 0.0001:
             eta = self.eta()
+           
 
             if eta <= 1/m:
-                self.W = m*self.W
+                self.W += m*self.W
             else:
                 self.final = {'z':self.pos[2],
                               'r':0,

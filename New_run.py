@@ -15,39 +15,62 @@ def run(number):
         print (number)
     
     material = medium()
-    photon = photons(material, weight=1)
+    
+    photon = photons(material,
+                     inclusion_size=material.inclusion_size, 
+                     inclusion_centre_depth=material.inclusion_depth, 
+                     weight=1)
 
     absorption = np.zeros(3)
     
 
     # Runs the photon trasnport for Monte Carlo photon transport 
+    #print ('NEW PHOTON')
     while photon.alive:
         
         photon.stepSize()
-        photon.Refractive_index()
+        
+        photon.Coefficient_check()
+        
 
         if not photon.is_scattered:
             # Only true if the photon hasnt moved yet and also 
             photon.fresnelReflection() 
 
         while photon.hit_boundary():
-    
-            photon.transmission()
-            photon.Refractive_index()
-       
+            
+            try:
+                if photon.faces == 'front' or photon.faces == 'back':
+                    photon.transmission_x_plane()
+                    print ('x_plane')
+
+                elif photon.faces == 'left' or photon.faces == 'right':
+                    photon.transmission_y_plane()
+                    print('yplane')
+            
+            except:
+                photon.transmission()
+
+
+            photon.Coefficient_check()
+        
         if photon.W == 0:
             
             return photon.final, absorption
-        
+        #print ('*weight',photon.W)
         photon.move()
+        
         photon.absorb()
+        
 
         # [z, W, type]
         temp_list = np.hstack((photon.pos[-1], photon.absorbed, photon.absorbed_type))
         absorption = np.vstack([absorption, temp_list])
 
+       # print ('weight&', photon.W)
         photon.scatter()
         photon.roulette()
+        
        
         
     #final_pos = np.concatenate((photon.pos, photon.vel))
@@ -91,7 +114,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 200
+    N_grid = 20
 
     
 
@@ -163,25 +186,26 @@ if __name__ == '__main__':
     names = ['z','r','angle', 'weight','type']
     photon_data = np.empty(len(names))
 
-    '''
-    #  Linear computation for bugfixing
-    for i in range(numberPhotons):
-        # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
-        data, absorbtion = run(i)
-    '''
+   
 
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        for data, absorbtion in pool.map(run, range(numberPhotons)):
-            
+        # for data, absorbtion in pool.map(run, range(numberPhotons)):
+        
+         
+        #  Linear computation for bugfixing
+        for i in range(numberPhotons):
+            # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
+            data, absorbtion = run(i)
+        
 
             # Assigns a bin number to the data so that the weight can be stored
             z_bin = np.digitize(data['z'], bins_z)
             r_bin = np.digitize(data['r'], bins_r)
             angle_bin = np.digitize(data['angle'], bins_alpha)
 
-
+               
             # Absorbtion data
             # Assigning bin values to the absorbtion data corresponding with absorbed z vals
             
@@ -211,17 +235,17 @@ if __name__ == '__main__':
             if absorbtion.ndim != 1:
 
                 # Absorbtion scattered or unscattered
-                for i in range(len(absorbtion)):
+                for i in range(len(absorbtion)):    
                     
-                    absorbtion_z_bin = np.digitize(absorbtion[i], bins_z)
-
+                    absorbtion_z_bin = np.digitize(absorbtion[i][0], bins_z)
+                    
                     if absorbtion[i][-1] == 1:
                         # Unscattered Absorbtion
-                        unscattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+                        unscattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
 
                     elif absorbtion[i][-1] == 2:
                         # Scattered absorbtion
-                        scattered_absorbtion[absorbtion_z_bin-1] = absorbtion[i][1]
+                        scattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
 
                 
             
@@ -259,7 +283,7 @@ if __name__ == '__main__':
         T_da = angle_transmittance / (numberPhotons*delta_omega)
 
         # Convert raw absorbtion data to physical quantity
-        A_z = absorbtion_weights / numberPhotons * delta_z * delta_a
+        A_z = absorbtion_weights / numberPhotons * delta_z 
         Total_absorbtion = np.sum(A_z)
 
 
@@ -270,6 +294,7 @@ if __name__ == '__main__':
 
     images = True
     if images == True:
+        
         plt.figure()
         plt.ylabel('Diffuse Reflectance $sr^{-1}$')
         plt.xlabel('Exit angle (rad)')
@@ -281,7 +306,7 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
-
+        
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
         plt.xlabel('z depth')
