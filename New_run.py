@@ -42,9 +42,11 @@ def run(number):
             try:
                 if photon.faces == 'front' or photon.faces == 'back':
                     photon.transmission_x_plane()
+                    print ('x_plane')
 
                 elif photon.faces == 'left' or photon.faces == 'right':
                     photon.transmission_y_plane()
+                    print('yplane')
             
             except:
                 photon.transmission()
@@ -112,7 +114,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 100
+    N_grid = 20
 
     
 
