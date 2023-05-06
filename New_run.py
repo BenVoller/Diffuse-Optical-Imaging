@@ -18,7 +18,7 @@ def run(number):
     
     photon = photons(material,
                      inclusion_size=material.inclusion_size, 
-                     inclusion_centre_depth=material.inclusion_depth, 
+                     inclusion_center=material.inclusion_center, 
                      weight=1)
 
     absorption = np.zeros(3)
