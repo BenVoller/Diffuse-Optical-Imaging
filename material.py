@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 10000
+        self.NumberPhotons = 100
     
         
         # [depth, refractive_index(n), u_a, u_s, g]
@@ -92,8 +92,9 @@ class medium():
         ]
 
         for plane in planes:
-            plane['point'][-1] -= centre_depth
-
+            plane['point'][-1] += centre_depth
+            plane['point'][0] += 100
+            print (plane)
         inclusion_layer = False
         for i in range(len(self.layers_important)):
             if self.layers_important[i][0] > centre_depth and not inclusion_layer:
@@ -115,6 +116,7 @@ class medium():
         faces = []
         for plane in planes:
             numerator = np.dot(plane['normal'], (plane['point'] - position))
+            print ('numerator {}'.format(numerator))
             denominator = np.dot(plane['normal'], direction)
             if denominator != 0:
                 distance = numerator / denominator

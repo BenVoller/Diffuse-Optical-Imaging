@@ -65,6 +65,8 @@ class photons():
         # Calls the original Refractive index function
         
         self.Refractive_index()
+        #print ('pos', self.pos, 'vel', self.vel)
+        #print ('in inclusion', self.in_inclusion)
         
 
         if self.in_inclusion:
@@ -75,6 +77,8 @@ class photons():
         
 
         inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
+
+        print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
             '''
             print (self.pos, self.vel, self.W)
@@ -89,11 +93,9 @@ class photons():
             
         
         
-            
-                
-
-
+        
     def axis_rotation(self):
+        ''' A now redundant function'''
 
         pos= self.pos
         vel= self.vel
