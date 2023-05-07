@@ -191,11 +191,11 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        # for data, absorbtion in pool.map(run, range(numberPhotons)):
+        for data, absorbtion in pool.map(run, range(numberPhotons)):
         
          
         #  Linear computation for bugfixing
-        for i in range(numberPhotons):
+        #for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorbtion = run(i)
         
