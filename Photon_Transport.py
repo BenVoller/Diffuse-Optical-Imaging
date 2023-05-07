@@ -88,6 +88,7 @@ class photons():
 
         #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
+            print ('WHAT UP')
             '''
             print (self.pos, self.vel, self.W)
             print (self.current_coeffs)
@@ -217,8 +218,10 @@ class photons():
                     self.mu_t = self.mu_a + self.mu_s
                     
 
-                # Sets the distance to the boundary
+                # Sets the distance to the boundary in the z direction
                 self.db = (self.zt - z) / self.vel[-1]
+                
+
                 break
 
             
@@ -233,11 +236,21 @@ class photons():
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             
+            #direction = self.vel / np.linalg.norm(self.vel)
+            #print ('direction', direction, 'vel', self.vel)
+            #print ('pos', self.pos)
+
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
+
+            #print (self.pos + self.vel * self.db, self.zt)
             #self.layer_no += np.sign(self.vel[-1])
-            self.pos[-1] = self.zt # moves the photon to the boundary.
+            #self.pos[-1] = self.zt # moves the photon to the boundary.
+            self.pos += self.vel*self.db
             
+
+            
+            #print ('new pos', self.pos)
             return True
         
         elif self.exiting:
