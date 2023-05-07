@@ -88,7 +88,7 @@ class photons():
 
         #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
-            print ('WHAT UP')
+            #print ('WHAT UP')
             '''
             print (self.pos, self.vel, self.W)
             print (self.current_coeffs)

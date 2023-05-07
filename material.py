@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 10000
+        self.NumberPhotons = 100000
     
         
         # [depth, refractive_index(n), u_a, u_s, g]
@@ -30,7 +30,7 @@ class medium():
                                  2:layer3}
         
         # [depth, refractive_index(n), u_a, u_s, g]
-        self.inclusion_center = np.array([100,0,0.012])
+        self.inclusion_center = np.array([0,0,0.012])
         self.inclusion_size = 0.003
         self.inclusion_properties = [self.inclusion_center[-1],1.0,10,90,0.75]
         
