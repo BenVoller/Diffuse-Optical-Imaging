@@ -11,7 +11,7 @@ np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, medium,inclusion_size, inclusion_centre_depth, weight):
+    def __init__(self, medium,inclusion_size, inclusion_center, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
         # These will record the values used to analyse the validity of the solver
@@ -42,8 +42,11 @@ class photons():
 
         
         # Defines the planes of the inclusion as a list of dictionaries
-        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_centre_depth)
+        
+        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_center)
         self.inclusion_properties = medium.inclusion_properties
+        self.inclusion_center = inclusion_center
+        self.inclusion_size = inclusion_size
         # Denotes if the photon is within the inclusion
         self.in_inclusion = False
         
@@ -76,10 +79,16 @@ class photons():
             self.g = self.inclusion_properties[4]
         
 
-        inclusion_dist, self.face = medium.find_collision_distance(self,planes=self.inclusion, position=self.pos, velocity=self.vel)
+        inclusion_dist, self.face = medium.find_collision_distance(self,
+                                                                   planes=self.inclusion,
+                                                                   center_point = self.inclusion_center,
+                                                                   size = self.inclusion_size,
+                                                                   position=self.pos, 
+                                                                   velocity=self.vel)
 
-        print ('inclusion distance', inclusion_dist)
+        #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
+            #print ('WHAT UP')
             '''
             print (self.pos, self.vel, self.W)
             print (self.current_coeffs)
@@ -209,8 +218,10 @@ class photons():
                     self.mu_t = self.mu_a + self.mu_s
                     
 
-                # Sets the distance to the boundary
+                # Sets the distance to the boundary in the z direction
                 self.db = (self.zt - z) / self.vel[-1]
+                
+
                 break
 
             
@@ -225,11 +236,21 @@ class photons():
 
         if abs(self.db*self.mu_t) < abs(self.s_):
             
+            #direction = self.vel / np.linalg.norm(self.vel)
+            #print ('direction', direction, 'vel', self.vel)
+            #print ('pos', self.pos)
+
             #  Photon is moved to the boundary and the step size is updated
             self.s_ -= self.db*self.mu_t
+
+            #print (self.pos + self.vel * self.db, self.zt)
             #self.layer_no += np.sign(self.vel[-1])
-            self.pos[-1] = self.zt # moves the photon to the boundary.
+            #self.pos[-1] = self.zt # moves the photon to the boundary.
+            self.pos += self.vel*self.db
             
+
+            
+            #print ('new pos', self.pos)
             return True
         
         elif self.exiting:

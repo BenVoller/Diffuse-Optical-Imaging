@@ -7,15 +7,15 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 100
+        self.NumberPhotons = 100000
     
-        
+        '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.009, 1.0, 10, 90, 0.9]
-        layer2 = [0.015, 1.0, 10, 90, 0.9]
-        layer3 = [0.02, 1.0, 10, 90, 0.9]
+        layer1 = [1, 1.5, 10, 90, 0]
+        layer2 = [3, 1.5, 10, 90, 0]
+        layer3 = [5, 1.5, 10, 90, 0]
         layer4 = [999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -30,13 +30,13 @@ class medium():
                                  2:layer3}
         
         # [depth, refractive_index(n), u_a, u_s, g]
-        self.inclusion_depth = 0.012
-        self.inclusion_size = 0.003
-        self.inclusion_properties = [self.inclusion_depth,1,10,90,0.9]
-        
-        #self.inclusion_layer = 0
-        self.depth = 0.02
+        self.inclusion_center = np.array([0,0,1])
+        self.inclusion_size = 0.5
+        self.inclusion_properties = [self.inclusion_center[-1],1.5,10,90,0]
         '''
+        #self.inclusion_layer = 0
+        self.depth = 5
+        
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]         # Air
@@ -74,30 +74,42 @@ class medium():
         
 
         self.depth = self.layers_important[7][0]
-        '''
+
+        self.inclusion_center = np.array([0,0,0.023])
+        self.inclusion_size = 0.5
+        self.inclusion_properties = [self.inclusion_center[-1],1.39, 1.427, 145.625, 0.818]
+        
     
-    def inclusion(self, size, centre_depth):
+    def inclusion(self, size, center_point):
 
         '''
         Defines a square inclusion based on the layers defined in __init__
         returns the 6 faces of the cube as '''
 
+          # Normalize velocity vector to get direction
+        '''
+        direction = velocity / np.linalg.norm(velocity)
+        print ('direction: ', direction)
+        '''
+
+        self.center_point = center_point 
+        self.size = size 
+        
+        # Define the six planes of the cube
         planes = [
-        {'normal': np.array([1, 0, 0]), 'point': np.array([-size/2, 0, 0]), 'face':'left'},  # left face
-        {'normal': np.array([-1, 0, 0]), 'point': np.array([size/2, 0, 0]), 'face':'right'},  # right face
-        {'normal': np.array([0, 1, 0]), 'point': np.array([0, -size/2, 0]), 'face':'back'},  # back face
-        {'normal': np.array([0, -1, 0]), 'point': np.array([0, size/2, 0]), 'face':'front'},  # front face
-        {'normal': np.array([0, 0, 1]), 'point': np.array([0, 0, -size/2]), 'face':'top'},  # top face
-        {'normal': np.array([0, 0, -1]), 'point': np.array([0, 0, size/2]), 'face':'bottom'}   # bottom face
+            {'normal': np.array([1, 0, 0]), 'point': center_point + [-size/2, 0, 0], 'face':'left'},  # left face
+            {'normal': np.array([-1, 0, 0]), 'point':center_point + [size/2, 0, 0], 'face':'right'},  # right face
+            {'normal': np.array([0, 1, 0]), 'point':center_point + [0, -size/2, 0], 'face':'back'},  # back face
+            {'normal': np.array([0, -1, 0]), 'point':center_point + [0, size/2, 0], 'face':'front'},  # front face
+            {'normal': np.array([0, 0, 1]), 'point':center_point + [0, 0, -size/2], 'face':'top'},  # front face
+            {'normal': np.array([0, 0, -1]), 'point':center_point + [0, 0, size/2], 'face':'bottom'}   # back face
         ]
 
-        for plane in planes:
-            plane['point'][-1] += centre_depth
-            plane['point'][0] += 100
-            print (plane)
+        
+            
         inclusion_layer = False
         for i in range(len(self.layers_important)):
-            if self.layers_important[i][0] > centre_depth and not inclusion_layer:
+            if self.layers_important[i][0] > center_point[-1] and not inclusion_layer:
                 inclusion_layer = i
 
         return planes, inclusion_layer
@@ -106,7 +118,7 @@ class medium():
 
         
 
-    def find_collision_distance(self, planes, position, velocity):
+    def find_collision_distance(self, planes,center_point, size, position, velocity):
         # Normalize velocity vector to get direction
         direction = velocity / np.linalg.norm(velocity)
         
@@ -116,14 +128,24 @@ class medium():
         faces = []
         for plane in planes:
             numerator = np.dot(plane['normal'], (plane['point'] - position))
-            print ('numerator {}'.format(numerator))
+            #print ('numerator {}'.format(numerator))
             denominator = np.dot(plane['normal'], direction)
             if denominator != 0:
                 distance = numerator / denominator
                 if distance > 0:
-                    distances.append(distance)
-                    faces.append(plane['face'])
-        
+                    intersection_pos = position + (direction * distance)
+                    in_bounds = True
+                    for i in range(len(intersection_pos)):
+                
+                        neg_side = center_point[i] - size/2
+                        pos_side = center_point[i] + size/2
+
+                        if abs(intersection_pos[i]) < neg_side or abs(intersection_pos[i]) > pos_side:
+                            in_bounds = False       
+                    # print (in_bounds)
+                    if in_bounds:                         
+                        distances.append(distance)
+                        faces.append(plane['face'])
         # Return the minimum distance
         if distances:
             index = np.argmin(distances)

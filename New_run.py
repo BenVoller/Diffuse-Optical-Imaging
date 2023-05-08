@@ -18,7 +18,7 @@ def run(number):
     
     photon = photons(material,
                      inclusion_size=material.inclusion_size, 
-                     inclusion_centre_depth=material.inclusion_depth, 
+                     inclusion_center=material.inclusion_center, 
                      weight=1)
 
     absorption = np.zeros(3)
@@ -191,11 +191,11 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        # for data, absorbtion in pool.map(run, range(numberPhotons)):
+        for data, absorbtion in pool.map(run, range(numberPhotons)):
         
          
         #  Linear computation for bugfixing
-        for i in range(numberPhotons):
+        #for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorbtion = run(i)
         
