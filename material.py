@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 100000
+        self.NumberPhotons = 1000
     
         '''
         # [depth, refractive_index(n), u_a, u_s, g]

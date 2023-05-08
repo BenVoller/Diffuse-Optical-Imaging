@@ -425,7 +425,8 @@ class photons():
             r = np.sqrt(self.pos[0]**2 + self.pos[1]**2)
             angle = np.arccos(abs(self.vel[-1]) / np.sqrt(self.vel[0]**2 + self.vel[1]**2 + self.vel[2]**2))
             #self.final = np.hstack((self.pos[0], r, angle,  self.W, exit_type))
-            self.final = {'z':self.pos[2],
+            self.final = {'x':self.pos[0],
+                        'z':self.pos[2],
                         'r':r,
                         'angle':angle,
                         'W':self.W,
@@ -507,7 +508,8 @@ class photons():
             if eta <= 1/m:
                 self.W += m*self.W
             else:
-                self.final = {'z':self.pos[2],
+                self.final = {'x':self.pos[0],
+                              'z':self.pos[2],
                               'r':0,
                               'angle':0,
                               'W':self.W,

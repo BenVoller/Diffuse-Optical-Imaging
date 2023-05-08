@@ -177,13 +177,13 @@ if __name__ == '__main__':
 
     
     
-    scattered_absorbtion = np.zeros(N_grid)
-    unscattered_absorbtion = np.zeros(N_grid)
+    scattered_absorption = np.zeros([N_grid, N_grid])
+    unscattered_absorption = np.zeros([N_grid, N_grid])
     
-    absorbtion_weights = np.zeros(N_grid)
+    absorption_weights = np.zeros([N_grid, N_grid])
 
 
-    names = ['z','r','angle', 'weight','type']
+    names = ['x','z','r','angle', 'weight','type']
     photon_data = np.empty(len(names))
 
    
@@ -191,23 +191,24 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        for data, absorbtion in pool.map(run, range(numberPhotons)):
+        #for data, absorption in pool.map(run, range(numberPhotons)):
         
          
         #  Linear computation for bugfixing
-        #for i in range(numberPhotons):
+        for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
-            data, absorbtion = run(i)
+            data, absorption = run(i)
         
 
             # Assigns a bin number to the data so that the weight can be stored
+            x_bin = np.digitize(data['x'], bins_z)
             z_bin = np.digitize(data['z'], bins_z)
             r_bin = np.digitize(data['r'], bins_r)
             angle_bin = np.digitize(data['angle'], bins_alpha)
 
                
-            # Absorbtion data
-            # Assigning bin values to the absorbtion data corresponding with absorbed z vals
+            # Absorption data
+            # Assigning bin values to the absorption data corresponding with absorbed z vals
             
 
 
@@ -230,31 +231,36 @@ if __name__ == '__main__':
             
 
 
-            # # # This splits the absorbtion into specific scattered or unscattered bins
+            # # # This splits the absorption into specific scattered or unscattered bins
             
-            if absorbtion.ndim != 1:
+            if absorption.ndim != 1:
 
-                # Absorbtion scattered or unscattered
-                for i in range(len(absorbtion)):    
+                # Absorption scattered or unscattered
+                for i in range(len(absorption)):    
                     
-                    absorbtion_z_bin = np.digitize(absorbtion[i][0], bins_z)
+                    absorption_x_bin = np.digitize(absorption[i][0], bins_z)
+                    absorption_z_bin = np.digitize(absorption[i][1], bins_z)
                     
-                    if absorbtion[i][-1] == 1:
-                        # Unscattered Absorbtion
-                        unscattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
-
-                    elif absorbtion[i][-1] == 2:
-                        # Scattered absorbtion
-                        scattered_absorbtion[absorbtion_z_bin-1] += absorbtion[i][1]
+                    if absorption[i][-1] == 1:
+                        # Unscattered Absorption
+                        #unscattered_absorption[absorption_z_bin-1] += absorption[i][1]
+                        absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
+                
+                    elif absorption[i][-1] == 2:
+                        # Scattered absorption
+                        #scattered_absorption[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
+                        absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
 
                 
             
-            #absorbtion_weights += (scattered_absorbtion + unscattered_absorbtion)
-            absorbtion_weights += scattered_absorbtion
+            #absorption_weights += (scattered_absorption + unscattered_absor[tion)
+            #absorption_weights += scattered_absorption
         
             # photon_data = np.vstack([photon_data, data])
 
-    
+        
+
+
         
         # process pool is closed automatically
 
@@ -282,9 +288,9 @@ if __name__ == '__main__':
         R_da = angle_reflectance / (numberPhotons*delta_omega)
         T_da = angle_transmittance / (numberPhotons*delta_omega)
 
-        # Convert raw absorbtion data to physical quantity
-        A_z = absorbtion_weights / numberPhotons * delta_z 
-        Total_absorbtion = np.sum(A_z)
+        # Convert raw absorption data to physical quantity
+        A_z = absorption_weights / numberPhotons * delta_z 
+        Total_absorption = np.sum(A_z)
 
 
         ### Fluence
