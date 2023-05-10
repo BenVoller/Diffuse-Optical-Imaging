@@ -117,7 +117,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 200
+    N_grid = 100
 
     
 
@@ -202,14 +202,14 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        # for data, absorption in pool.map(run, range(numberPhotons)):
+        for data, absorption in pool.map(run, range(numberPhotons)):
 
-            
+            '''
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorption = run(i)
-            
+            '''
 
             # Assigns a bin number to the data so that the weight can be stored
             
@@ -311,7 +311,7 @@ if __name__ == '__main__':
 
         print (Fluence)
 
-        Fluence_z = np.sum(Fluence, axis=0)
+        Fluence_z = np.sum(Fluence, axis=1)
 
     np.save('Fluence_data_z', Fluence_z)
 

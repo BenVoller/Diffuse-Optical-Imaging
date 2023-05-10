@@ -289,14 +289,14 @@ class photons():
         alpha_i = np.arccos(abs(self.vel[-1]))
 
         # Gathers the refractive indices for the iniital and new medium
-        if abs(self.ni*np.sin(alpha_i)/self.nt)>1:
+        #if abs(self.ni*np.sin(alpha_i)/self.nt)>1:
             #print (self.exiting)
-            print ('pos', self.pos)
-            print ('vel', self.vel)
-            print ('alpha_i', alpha_i)
+            #print ('pos', self.pos)
+            #print ('vel', self.vel)
+            #print ('alpha_i', alpha_i)
             #print ('ni', self.ni, 'nt', self.nt)
 
-        alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+        #alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
         
             
 
@@ -306,15 +306,17 @@ class photons():
 
         if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
             Ri = 1
+        else:
+            alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
-        elif alpha_i == 0 and alpha_t == 0:
-            # Fixes a Runtime error in the Reflection amount
-            Ri = 0
+            if alpha_i == 0 and alpha_t == 0:
+                # Fixes a Runtime error in the Reflection amount
+                Ri = 0
 
-        else: 
-            # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
-            # be randomly polarised
-            Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
+            else: 
+                # Average if the reflectance for two orthogonal linear poloarisation states because light is assumed to 
+                # be randomly polarised
+                Ri = 0.5*( (np.sin(alpha_i - alpha_t)**2)/(np.sin(alpha_i + alpha_t)**2) + (np.tan(alpha_i - alpha_t)**2)/(np.tan(alpha_i + alpha_t)**2) )
 
         # Now check is the photon packet is reflected or transmitted. 
         if self.eta() <= Ri:
