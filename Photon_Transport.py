@@ -289,8 +289,16 @@ class photons():
         alpha_i = np.arccos(abs(self.vel[-1]))
 
         # Gathers the refractive indices for the iniital and new medium
-        
+        if abs(self.ni*np.sin(alpha_i)/self.nt)>1:
+            #print (self.exiting)
+            print ('pos', self.pos)
+            print ('vel', self.vel)
+            print ('alpha_i', alpha_i)
+            #print ('ni', self.ni, 'nt', self.nt)
+
         alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
+        
+            
 
         
 
