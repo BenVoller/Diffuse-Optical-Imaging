@@ -105,16 +105,19 @@ def SORS(df, xmin=0, width=0.001, r=0):
 
 if __name__ == '__main__':
 
+    
+
     material = medium()
     # Begining time for the simulation
     t0 = time.time()
     n_cpu = mp.cpu_count()  # = 8 
     numberPhotons = material.NumberPhotons # Number of photons
 
+    print ('number of Photons: ', numberPhotons)
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 200
+    N_grid = 100
 
     
 
@@ -200,7 +203,7 @@ if __name__ == '__main__':
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
         for data, absorption in pool.map(run, range(numberPhotons)):
-        
+
             '''
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
@@ -209,7 +212,7 @@ if __name__ == '__main__':
             '''
 
             # Assigns a bin number to the data so that the weight can be stored
-            x_bin = np.digitize(data['x'], bins_x)
+            
             z_bin = np.digitize(data['z'], bins_z)
             r_bin = np.digitize(data['r'], bins_r)
             angle_bin = np.digitize(data['angle'], bins_alpha)
@@ -308,7 +311,7 @@ if __name__ == '__main__':
 
         print (Fluence)
 
-        Fluence_z = np.sum(Fluence, axis=0)
+        Fluence_z = np.sum(Fluence, axis=1)
 
     np.save('Fluence_data_z', Fluence_z)
 
