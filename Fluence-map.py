@@ -8,7 +8,7 @@ data = np.load('Fluence_data.npy')
 
 # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-N_grid = 200
+N_grid = 100
 
 # size of Grid elements
 delta_z = 0.5 / N_grid
@@ -40,7 +40,7 @@ X, Y = np.meshgrid(X_i_vals, Z_i_vals)
 
 fig, ax = plt.subplots()
 
-cax = ax.pcolormesh(X,Y, np.log(data), cmap=cm.afmhot)
+cax = ax.pcolormesh(X,Y, np.log(data))
 
 ax.set_title('Cube inclusion fluence')
 
