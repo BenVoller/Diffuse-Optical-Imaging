@@ -21,7 +21,7 @@ def run(number):
                      inclusion_center=material.inclusion_center, 
                      weight=1)
 
-    absorption = np.zeros(3)
+    absorption = np.zeros(4)
     
 
     # Runs the photon trasnport for Monte Carlo photon transport 
@@ -64,7 +64,7 @@ def run(number):
         
 
         # [z, W, type]
-        temp_list = np.hstack((photon.pos[-1], photon.absorbed, photon.absorbed_type))
+        temp_list = np.hstack((photon.pos[0], photon.pos[-1], photon.absorbed, photon.absorbed_type))
         absorption = np.vstack([absorption, temp_list])
 
        # print ('weight&', photon.W)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 20
+    N_grid = 200
 
     
 
@@ -129,8 +129,10 @@ if __name__ == '__main__':
     R_ir = np.arange(N_grid)
     alpha_ia = np.arange(N_grid)
     Z_i = np.arange(N_grid)
+    X_i = np.arange(N_grid) - N_grid/2
 
     # Define Histogram bins 
+    bins_x = X_i * delta_z
     bins_z = Z_i * delta_z
     bins_r = R_ir *delta_r
     bins_alpha = alpha_ia * delta_alpha
@@ -141,6 +143,7 @@ if __name__ == '__main__':
     R_ir_vals = (R_ir + 0.5)*delta_r
     alpha_ia_vals = (alpha_ia + 0.5)*delta_alpha # extra term (1 - 0.5*delta_a*np.cot(delta_a/2))*(np.cot(i+0.5)*delta_a)
     Z_i_vals = (Z_i + 0.5)*delta_z
+    X_i_vals = (X_i + 0.5)*delta_z
 
     # area and solid angle
     delta_a = 2*np.pi*(R_ir_vals) * delta_r # cm^2
@@ -165,7 +168,11 @@ if __name__ == '__main__':
     for i in range(len(u_a_bins)):
         u_a_vals.append(layers[u_a_bins[i]][2])
 
-    
+    u_a_vals_array = np.ones([len(u_a_vals), len(u_a_vals)])
+    for row in range(len(u_a_vals_array)):
+        u_a_vals_array[row] *= u_a_vals[row]
+
+    print (u_a_vals_array)
 
 
     # empty_listsfor storing weights into 
@@ -183,7 +190,7 @@ if __name__ == '__main__':
     absorption_weights = np.zeros([N_grid, N_grid])
 
 
-    names = ['x','z','r','angle', 'weight','type']
+    names = ['z','r','angle', 'weight','type']
     photon_data = np.empty(len(names))
 
    
@@ -243,18 +250,18 @@ if __name__ == '__main__':
                     
                     if absorption[i][-1] == 1:
                         # Unscattered Absorption
-                        #unscattered_absorption[absorption_z_bin-1] += absorption[i][1]
-                        absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
+                        unscattered_absorption[absorption_z_bin-1] += absorption[i][2]
+                        # absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
                 
                     elif absorption[i][-1] == 2:
                         # Scattered absorption
-                        #scattered_absorption[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
-                        absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
+                        scattered_absorption[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
+                        # absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
 
                 
             
             #absorption_weights += (scattered_absorption + unscattered_absor[tion)
-            #absorption_weights += scattered_absorption
+            absorption_weights += scattered_absorption
         
             # photon_data = np.vstack([photon_data, data])
 
@@ -294,12 +301,21 @@ if __name__ == '__main__':
 
 
         ### Fluence
-        Fluence_z = A_z / u_a_vals
+        Fluence = A_z / u_a_vals
 
-    np.save('Fluence_data', Fluence_z)
+        np.save('Fluence_data', Fluence)
+
+        print (Fluence)
+
+        Fluence_z = np.sum(Fluence, axis=0)
+
+    np.save('Fluence_data_z', Fluence_z)
 
     images = True
     if images == True:
+
+        #plt.figure()
+        #plt.pcolormesh([Z_i_vals, X_i_vals,], Fluence)
         
         plt.figure()
         plt.ylabel('Diffuse Reflectance $sr^{-1}$')
