@@ -130,6 +130,7 @@ if __name__ == '__main__':
     alpha_ia = np.arange(N_grid)
     Z_i = np.arange(N_grid)
     X_i = np.arange(N_grid) - N_grid/2
+    
 
     # Define Histogram bins 
     bins_x = X_i * delta_z
@@ -198,17 +199,17 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        #for data, absorption in pool.map(run, range(numberPhotons)):
+        for data, absorption in pool.map(run, range(numberPhotons)):
         
-         
+            '''
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorption = run(i)
-        
+            '''
 
             # Assigns a bin number to the data so that the weight can be stored
-            x_bin = np.digitize(data['x'], bins_z)
+            x_bin = np.digitize(data['x'], bins_x)
             z_bin = np.digitize(data['z'], bins_z)
             r_bin = np.digitize(data['r'], bins_r)
             angle_bin = np.digitize(data['angle'], bins_alpha)
@@ -245,7 +246,7 @@ if __name__ == '__main__':
                 # Absorption scattered or unscattered
                 for i in range(len(absorption)):    
                     
-                    absorption_x_bin = np.digitize(absorption[i][0], bins_z)
+                    absorption_x_bin = np.digitize(absorption[i][0], bins_x)
                     absorption_z_bin = np.digitize(absorption[i][1], bins_z)
                     
                     if absorption[i][-1] == 1:

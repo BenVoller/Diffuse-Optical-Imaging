@@ -24,6 +24,7 @@ Z_i = np.arange(N_grid)
 X_i = np.arange(N_grid) - N_grid/2
 
 
+
 # See extra terms from Taylor exapansion to improve accuracy
 R_ir_vals = (R_ir + 0.5)*delta_r
 alpha_ia_vals = (alpha_ia + 0.5)*delta_alpha # extra term (1 - 0.5*delta_a*np.cot(delta_a/2))*(np.cot(i+0.5)*delta_a)
@@ -39,7 +40,8 @@ X, Y = np.meshgrid(X_i_vals, Z_i_vals)
 
 fig, ax = plt.subplots()
 
-cax = ax.imshow(np.log(data), cmap=cm.afmhot)
+cax = ax.pcolormesh(X,Y, np.log(data), cmap=cm.afmhot)
+
 ax.set_title('Cube inclusion fluence')
 
 cbar = fig.colorbar(cax, ticks=[0, 1])
