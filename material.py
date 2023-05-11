@@ -13,9 +13,9 @@ class medium():
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [1, 1, 0.1, 90, 0.9]
-        layer2 = [5, 1, 0.1, 90, 0.9]
-        layer3 = [10, 1, 0.1, 90, 0.9]
+        layer1 = [1, 1.37, 0.1, 90, 0.9]
+        layer2 = [5, 1.37, 0.1, 90, 0.9]
+        layer3 = [10, 1.37, 0.1, 90, 0.9]
         layer4 = [99999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
