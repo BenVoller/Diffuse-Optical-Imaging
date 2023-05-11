@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 data = np.load('Fluence_data.npy')
+z_data = np.load('Fluence_data_z.npy')
 
 
 
@@ -46,7 +47,14 @@ ax.set_title('Cube inclusion fluence')
 
 cbar = fig.colorbar(cax, ticks=[0, 1])
 
-
 cbar.ax.set_xticklabels(['Low', 'High'])  # horizontal colorbar
+plt.show()
+
+
+plt.figure()
+plt.plot(Z_i_vals, np.log(z_data), 'x')
+plt.plot(Z_i_vals,(Z_i_vals*-0.57)+ 1.5)
+plt.xlabel('z depth')
+plt.ylabel('Fluence')
 plt.show()
 

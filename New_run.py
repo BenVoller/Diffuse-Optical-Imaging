@@ -14,8 +14,6 @@ def run(number):
         #time.sleep(3)
         print (number)
     
-    if number % 25000 == 0:
-        np.save('absorption_raw_{}'.format(number), absorption)
 
 
     material = medium()
