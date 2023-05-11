@@ -60,6 +60,8 @@ def run(number):
             
             return photon.final, absorption
         #print ('*weight',photon.W)
+
+        
         photon.move()
         
         photon.absorb()
