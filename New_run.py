@@ -38,9 +38,9 @@ def run(number):
         if not photon.is_scattered:
             # Only true if the photon hasnt moved yet and also 
             photon.fresnelReflection() 
-
+            
         while photon.hit_boundary():
-            '''
+            
             try:
                 if photon.faces == 'front' or photon.faces == 'back':
                     photon.transmission_x_plane()
@@ -50,25 +50,21 @@ def run(number):
                     photon.transmission_y_plane()
                     print('yplane')
             
-
             except:
                 photon.transmission()
-            '''
-            photon.transmission()
+
 
             photon.Coefficient_check()
 
+        if photon.pos[-1] < 0:
+            print('here we go again') 
         
         if photon.W == 0:
             
             return photon.final, absorption
-        
-        if photon.pos[-1] < 0:
-            
-            print ('problemo')
-            print ('pos', photon.pos)
-            print ('weight', photon.W)
         #print ('*weight',photon.W)
+
+        
         photon.move()
         
         photon.absorb()
@@ -128,15 +124,15 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 200
+    N_grid = 100
 
+    
 
     # size of Grid elements
     delta_z = material.depth / N_grid
     delta_r = material.depth * 2 / N_grid
     delta_alpha = np.pi / (2*N_grid)
 
-    
 
 
     # Optimal coordinates of the simulated quantities
@@ -144,7 +140,6 @@ if __name__ == '__main__':
     alpha_ia = np.arange(N_grid)
     Z_i = np.arange(N_grid)
     X_i = np.arange(N_grid) - N_grid/2
-    
     
 
     # Define Histogram bins 
@@ -160,8 +155,6 @@ if __name__ == '__main__':
     alpha_ia_vals = (alpha_ia + 0.5)*delta_alpha # extra term (1 - 0.5*delta_a*np.cot(delta_a/2))*(np.cot(i+0.5)*delta_a)
     Z_i_vals = (Z_i + 0.5)*delta_z
     X_i_vals = (X_i + 0.5)*delta_z
-
-    
 
     # area and solid angle
     delta_a = 2*np.pi*(R_ir_vals) * delta_r # cm^2
@@ -216,14 +209,14 @@ if __name__ == '__main__':
         # create and configure the process pool
     with mp.Pool(processes=n_cpu) as pool:
         # execute tasks in order
-        #for data, absorption in pool.map(run, range(numberPhotons)):
+        for data, absorption in pool.map(run, range(numberPhotons)):
 
-               
+            '''
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorption = run(i)
-            
+            '''    
 
             # Assigns a bin number to the data so that the weight can be stored
             
@@ -266,23 +259,12 @@ if __name__ == '__main__':
                     absorption_x_bin = np.digitize(absorption[i][0], bins_x)
                     absorption_z_bin = np.digitize(absorption[i][1], bins_z)
                     
-                    if absorption_x_bin == 0 or absorption_z_bin == 0:
-                        '''print(absorption[i])
-                        print(bins_x)
-                        print ('____')
-                        print (bins_z)
-                        time.sleep(5)'''
-
-
                     if absorption[i][-1] == 1:
                         # Unscattered Absorption
                         unscattered_absorption[absorption_z_bin-1] += absorption[i][2]
                         # absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
                 
                     elif absorption[i][-1] == 2:
-
-                        #if absorption_z_bin == 0:
-                            #print (absorption[i])
                         # Scattered absorption
                         scattered_absorption[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]
                         # absorption_weights[absorption_z_bin-1][absorption_x_bin-1] += absorption[i][2]

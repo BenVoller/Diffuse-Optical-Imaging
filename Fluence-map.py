@@ -1,19 +1,20 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 from matplotlib import cm
+from material import medium
 
 data = np.load('Fluence_data.npy')
 z_data = np.load('Fluence_data_z.npy')
 
-
+material = medium()
 
 # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
 N_grid = 100
 
 # size of Grid elements
-delta_z = 0.5 / N_grid
-delta_r = 0.5 * 2 / N_grid
+delta_z = material.depth / N_grid
+delta_r = material.depth * 2 / N_grid
 delta_alpha = np.pi / (2*N_grid)
 
 
@@ -48,13 +49,14 @@ ax.set_title('Cube inclusion fluence')
 cbar = fig.colorbar(cax, ticks=[0, 1])
 
 cbar.ax.set_xticklabels(['Low', 'High'])  # horizontal colorbar
-plt.show()
+
 
 
 plt.figure()
-plt.plot(Z_i_vals, np.log(z_data), 'x')
-plt.plot(Z_i_vals,(Z_i_vals*-0.57)+ 1.5)
+plt.plot(Z_i_vals[:10], np.log(z_data[:10]), 'x')
+plt.plot(Z_i_vals[:10],(Z_i_vals[:10]*-1.74)+ 5.45)
 plt.xlabel('z depth')
 plt.ylabel('Fluence')
 plt.show()
+
 

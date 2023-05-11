@@ -88,7 +88,7 @@ class photons():
 
         #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
-            print ('WHAT UP')
+            #print ('WHAT UP')
             '''
             print (self.pos, self.vel, self.W)
             print (self.current_coeffs)
@@ -99,9 +99,7 @@ class photons():
             self.db = inclusion_dist
             self.nt = self.inclusion_properties[1]
             
-        
-        
-    
+            
         
         
         
@@ -158,8 +156,6 @@ class photons():
         if direction == 0: 
             self.db = 99999999
 
-        
-        
 
         for i in range(-1,len(self.layers)):
 
@@ -174,11 +170,9 @@ class photons():
                
                 
                 if z == self.upper_bound:
-                    #print ('Exiting here')
+                    #print ('Exciting here')
                     self.exiting = True
                     
-                    
-
                 # Sets the layers based on direction = 1
                 
                 
@@ -196,16 +190,13 @@ class photons():
                 self.zt = self.layers[i-1][0]
 
                 # Checking if the photon is exciting
-                if z == 0:
-
-                    self.zt = self.layers[-1][0]
-                    self.db = 999999
+                if z == self.lower_bound:
+                    # print('This should have happened')
                     self.exiting = True
-                    break
+                    self.db = 99999
+                    
+                    
 
-                    
-                    
-                    
                 # Checking if the nearest boundary is current position
                 # in which case it is set to a the one lower
                 # print(self.pos,self.vel, direction,self.db)
@@ -251,15 +242,24 @@ class photons():
 
             #print (self.pos + self.vel * self.db, self.zt)
             #self.layer_no += np.sign(self.vel[-1])
+            '''
             #self.pos[-1] = self.zt # moves the photon to the boundary.
+            testing = self.pos + self.vel*self.db
+            if self.pos[-1] > 0 and testing[-1] < 0:
+                print ('db', self.db)
+                print (self.pos)
+                print (testing)
+            '''   
             self.pos += self.vel*self.db
+            self.pos[-1] = self.zt
+            
+            
             
 
             
             #print ('new pos', self.pos)
             return True
         
-
         elif self.exiting:
             self.transmission()
             return False
@@ -276,7 +276,7 @@ class photons():
         n1 = self.nt
         Rsp = ((n0 - n1) / (n0 + n1))**2
 
-        
+
         self.W += -Rsp
         self.unsc_reflectance += Rsp
 
@@ -304,16 +304,12 @@ class photons():
             #print ('ni', self.ni, 'nt', self.nt)
 
         #alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
-        
-            
-
-        
+    
 
         # Check if the photon is reflected if alpha_i is greater than the critical angle
 
         if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
             Ri = 1
-            print ('for some reason ni > nt')
         else:
             alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
@@ -330,8 +326,6 @@ class photons():
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
-            # returns the photon to the material 
-            self.exiting = False
             
             
         #####I think this may be redundant
@@ -339,7 +333,7 @@ class photons():
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
             #print ('HERE')
             self.photon_exit()
-
+            
             
           
         else:
@@ -421,15 +415,15 @@ class photons():
 
         if self.pos[-1] == 0 and not self.is_scattered:
             exit_type = 1 #Ru
-            #print ('Here')
+            print ('Here')
 
 
         elif self.pos[-1] == 0 and self.is_scattered:   
+            
             exit_type = 2 # Rd'
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            
             exit_type = 3, # Tu
             
 
@@ -440,7 +434,6 @@ class photons():
         
         
         try:
-            
             self.pos.astype(float)
             self.W = np.float(self.W)
             r = np.sqrt(self.pos[0]**2 + self.pos[1]**2)
