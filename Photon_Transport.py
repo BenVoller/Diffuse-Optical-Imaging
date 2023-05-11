@@ -73,6 +73,7 @@ class photons():
         
 
         if self.in_inclusion:
+            print ('Yellow')
             self.ni = self.inclusion_properties[1]
             self.mu_a = self.inclusion_properties[2]
             self.mu_a = self.inclusion_properties[3]
