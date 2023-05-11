@@ -271,8 +271,8 @@ if __name__ == '__main__':
 
                 
             
-            #absorption_weights += (scattered_absorption + unscattered_absor[tion)
-            absorption_weights += scattered_absorption
+                #absorption_weights += (scattered_absorption + unscattered_absor[tion)
+                absorption_weights += scattered_absorption
         
             # photon_data = np.vstack([photon_data, data])
 

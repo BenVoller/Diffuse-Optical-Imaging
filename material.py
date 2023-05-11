@@ -9,7 +9,7 @@ class medium():
 
         self.NumberPhotons = 10000
     
-        
+        '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
@@ -40,7 +40,7 @@ class medium():
         
         #self.inclusion_layer = 0
         #self.depth = 20
-        
+        '''
         #______________________________________________________
         #------------------------------------------------------
         #______________________________________________________
@@ -75,7 +75,7 @@ class medium():
         '''
 
 
-        '''
+        
         
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
@@ -88,7 +88,7 @@ class medium():
         layer6 = [0.184, 1.34, 4.443, 460.625, 0.962]         # Deep Blood Plexus
         layer7 = [0.200, 1.4, 1.05, 106.25, 0.8]              # Lower Dermis
         layer8 = [0.500, 1.46, 0.975, 97.125, 0.8]
-        layer9 = [10.0, 1.37, 1, 1, 0]             # Subcutaneous Fat
+        layer9 = [0.6, 1.37, 1, 1, 0]             # Subcutaneous Fat
         layer10 = [999.9, 1.37, 1, 1, 0]                      # Muscle
         
         self.layers = self.layers = {-1:layer_null,
@@ -122,7 +122,7 @@ class medium():
         self.inclusion_size = 0.5
         self.inclusion_properties = [self.inclusion_center[-1],1.39, 1.427, 145.625, 0.818]
         
-        '''
+        
     def inclusion(self, size, center_point):
 
         '''
