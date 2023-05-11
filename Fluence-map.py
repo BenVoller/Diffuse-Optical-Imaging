@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 data = np.load('Fluence_data.npy')
+z_data = np.load('Fluence_data_z.npy')
 
 
 
 # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-N_grid = 200
+N_grid = 100
 
 # size of Grid elements
 delta_z = 0.5 / N_grid
@@ -40,13 +41,20 @@ X, Y = np.meshgrid(X_i_vals, Z_i_vals)
 
 fig, ax = plt.subplots()
 
-cax = ax.pcolormesh(X,Y, np.log(data), cmap=cm.afmhot)
+cax = ax.pcolormesh(X,Y, np.log(data))
 
 ax.set_title('Cube inclusion fluence')
 
 cbar = fig.colorbar(cax, ticks=[0, 1])
 
-
 cbar.ax.set_xticklabels(['Low', 'High'])  # horizontal colorbar
+plt.show()
+
+
+plt.figure()
+plt.plot(Z_i_vals, np.log(z_data), 'x')
+plt.plot(Z_i_vals,(Z_i_vals*-0.57)+ 1.5)
+plt.xlabel('z depth')
+plt.ylabel('Fluence')
 plt.show()
 

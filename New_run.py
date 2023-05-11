@@ -14,6 +14,8 @@ def run(number):
         #time.sleep(3)
         print (number)
     
+
+
     material = medium()
     
     photon = photons(material,
@@ -204,7 +206,7 @@ if __name__ == '__main__':
         # execute tasks in order
         for data, absorption in pool.map(run, range(numberPhotons)):
 
-            '''
+            '''   
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
