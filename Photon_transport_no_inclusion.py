@@ -11,7 +11,7 @@ np.random.seed(1234)
 
 class photons():
 
-    def __init__(self, medium,inclusion_size, inclusion_center, weight):
+    def __init__(self, medium, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
         # These will record the values used to analyse the validity of the solver
@@ -40,17 +40,6 @@ class photons():
         self.upper_bound = medium.depth
         self.lower_bound = 0
 
-        
-        # Defines the planes of the inclusion as a list of dictionaries
-        
-        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_center)
-        self.inclusion_properties = medium.inclusion_properties
-        self.inclusion_center = inclusion_center
-        self.inclusion_size = inclusion_size
-        # Denotes if the photon is within the inclusion
-        self.in_inclusion = False
-        
-
 
         # Psuedo Random Number for the step size of the photon movement
     def eta(self):
@@ -60,90 +49,6 @@ class photons():
     def stepSize(self):
         
         self.s_ = -np.log(self.eta())
-
-    def Coefficient_check(self):
-        # Defines whether the photon packet is within the inclusion
-        # saves time in checking for boundaries.
-        
-        # Calls the original Refractive index function
-        
-        self.Refractive_index()
-        #print ('pos', self.pos, 'vel', self.vel)
-        #print ('in inclusion', self.in_inclusion)
-        
-
-        if self.in_inclusion:
-            self.ni = self.inclusion_properties[1]
-            self.mu_a = self.inclusion_properties[2]
-            self.mu_a = self.inclusion_properties[3]
-            self.g = self.inclusion_properties[4]
-        
-
-        inclusion_dist, self.face = medium.find_collision_distance(self,
-                                                                   planes=self.inclusion,
-                                                                   center_point = self.inclusion_center,
-                                                                   size = self.inclusion_size,
-                                                                   position=self.pos, 
-                                                                   velocity=self.vel)
-
-        #print ('inclusion distance', inclusion_dist)
-        if inclusion_dist < self.db and not self.exiting:
-            print ('WHAT UP')
-            '''
-            print (self.pos, self.vel, self.W)
-            print (self.current_coeffs)
-            print (self.exiting)
-            print (inclusion_dist, '<', self.db)
-            print ('----', self.inclusion_properties)
-            '''
-            self.db = inclusion_dist
-            self.nt = self.inclusion_properties[1]
-            
-        
-        
-    
-        
-        
-        
-    def axis_rotation(self):
-        ''' A now redundant function'''
-
-        pos= self.pos
-        vel= self.vel
-
-        if self.face == 'left' or self.face == 'right':
-            # Changes the coordinate system for transmission then returns it
-            # rotates to zxy
-            self.pos = np.array([-pos[2],pos[1],pos[0]], dtype=float)
-            self.vel = np.array([-vel[2],vel[1],vel[0]], dtype=float)
-
-            self.transmission()
-
-            self.pos = np.array([pos[2],pos[1],-pos[0]], dtype=float)
-            self.vel = np.array([vel[2],vel[1],-vel[0]], dtype=float)
-
-
-            
-        elif self.face == 'back' or self.face == 'front':
-            print ('before', self.pos, self.vel)
-            # Changes the coordinate system for transmission then returns it
-            self.pos = np.array([pos[0],pos[2],-pos[1]], dtype=float)
-            self.vel = np.array([vel[0],vel[2],-vel[1]], dtype=float)
-            
-            self.transmission()
-
-            self.pos = np.array([pos[0],-pos[2],pos[1]], dtype=float)
-            self.vel = np.array([vel[0],-vel[2],vel[1]], dtype=float)
-            print('after', self.pos, self.vel)
-        else:
-            print ('It is getting here')
-            self.transmission()
-
-
-        
-        
-
-
 
         
 
@@ -174,7 +79,7 @@ class photons():
                
                 
                 if z == self.upper_bound:
-                    #print ('Exiting here')
+                    #print ('Exciting here')
                     self.exiting = True
                     
                     
@@ -196,16 +101,12 @@ class photons():
                 self.zt = self.layers[i-1][0]
 
                 # Checking if the photon is exciting
-                if z == 0:
-
-                    self.zt = self.layers[-1][0]
-                    self.db = 999999
+                if z == self.lower_bound:
+                    # print('This should have happened')
                     self.exiting = True
-                    break
+                    
+                    
 
-                    
-                    
-                    
                 # Checking if the nearest boundary is current position
                 # in which case it is set to a the one lower
                 # print(self.pos,self.vel, direction,self.db)
@@ -259,7 +160,6 @@ class photons():
             #print ('new pos', self.pos)
             return True
         
-
         elif self.exiting:
             self.transmission()
             return False
@@ -276,7 +176,7 @@ class photons():
         n1 = self.nt
         Rsp = ((n0 - n1) / (n0 + n1))**2
 
-        
+
         self.W += -Rsp
         self.unsc_reflectance += Rsp
 
@@ -313,7 +213,6 @@ class photons():
 
         if self.ni > self.nt and alpha_i > np.arcsin(self.nt/self.ni):
             Ri = 1
-            print ('for some reason ni > nt')
         else:
             alpha_t = np.arcsin(self.ni*np.sin(alpha_i)/self.nt)
 
@@ -330,8 +229,6 @@ class photons():
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
-            # returns the photon to the material 
-            self.exiting = False
             
             
         #####I think this may be redundant
@@ -339,7 +236,6 @@ class photons():
             # Calls the photon exit function looking to record refletivity, Transmission and unscattered emmission. 
             #print ('HERE')
             self.photon_exit()
-
             
           
         else:
@@ -421,7 +317,7 @@ class photons():
 
         if self.pos[-1] == 0 and not self.is_scattered:
             exit_type = 1 #Ru
-            #print ('Here')
+            print ('Here')
 
 
         elif self.pos[-1] == 0 and self.is_scattered:   
@@ -549,6 +445,7 @@ class photons():
         # and also a sampling of the makeup of the tissue being investigated.
 
         self.wavelength 
+
 
 
 
