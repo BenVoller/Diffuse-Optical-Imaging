@@ -38,7 +38,7 @@ def run(number):
         if not photon.is_scattered:
             # Only true if the photon hasnt moved yet and also 
             photon.fresnelReflection() 
-
+            
         while photon.hit_boundary():
             
             try:
@@ -55,6 +55,9 @@ def run(number):
 
 
             photon.Coefficient_check()
+
+        if photon.pos[-1] < 0:
+            print('here we go again') 
         
         if photon.W == 0:
             
@@ -208,12 +211,12 @@ if __name__ == '__main__':
         # execute tasks in order
         for data, absorption in pool.map(run, range(numberPhotons)):
 
-            '''   
+            '''
         #  Linear computation for bugfixing
         for i in range(numberPhotons):
             # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
             data, absorption = run(i)
-            '''
+            '''    
 
             # Assigns a bin number to the data so that the weight can be stored
             

@@ -6,24 +6,18 @@ import multiprocessing as mp
 
 
 from material import medium
-from Photon_Transport import photons
+from Photon_transport_no_inclusion import photons
 
 def run(number):
     
     if number % 100 == 0:
         #time.sleep(3)
         print (number)
-    
-    if number % 25000 == 0:
-        np.save('absorption_raw_{}'.format(number), absorption)
 
 
     material = medium()
     
-    photon = photons(material,
-                     inclusion_size=material.inclusion_size, 
-                     inclusion_center=material.inclusion_center, 
-                     weight=1)
+    photon = photons(material, weight=1)
 
     absorption = np.zeros(4)
     
@@ -34,7 +28,7 @@ def run(number):
         
         photon.stepSize()
         
-        photon.Coefficient_check()
+        photon.Refractive_index()
         
 
         if not photon.is_scattered:
@@ -43,20 +37,11 @@ def run(number):
 
         while photon.hit_boundary():
             
-            try:
-                if photon.faces == 'front' or photon.faces == 'back':
-                    photon.transmission_x_plane()
-                    print ('x_plane')
-
-                elif photon.faces == 'left' or photon.faces == 'right':
-                    photon.transmission_y_plane()
-                    print('yplane')
             
-            except:
-                photon.transmission()
+            photon.transmission()
 
 
-            photon.Coefficient_check()
+            photon.Refractive_index()
         
         if photon.W == 0:
             
@@ -317,7 +302,7 @@ if __name__ == '__main__':
 
         Fluence_z = np.sum(Fluence, axis=1)
 
-    np.save('Fluence_data_z_wang_data', Fluence_z)
+        np.save('Fluence_data_z', Fluence_z)
 
     images = True
     if images == True:
@@ -340,6 +325,11 @@ if __name__ == '__main__':
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
         plt.xlabel('z depth')
+        plt.ylabel('Fluence')
+
+        plt.figure()
+        plt.plot(Z_i_vals, np.log(Fluence_z), 'x')
+        plt.xlabel('z_depth')
         plt.ylabel('Fluence')
 
 
