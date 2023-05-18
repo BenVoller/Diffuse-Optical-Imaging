@@ -310,17 +310,21 @@ if __name__ == '__main__':
         A_z = absorption_weights / numberPhotons * delta_z 
         Total_absorption = np.sum(A_z)
 
-
-        ### Fluence
         Fluence = A_z / u_a_vals
-
-        np.save('Fluence_data_10k2', Fluence)
-
-        print (Fluence)
-
         Fluence_z = np.sum(Fluence, axis=1)
+
+        inclusion_run = False
+        if inclusion_run  == True:
+        ### Fluence
+        
+
+            np.save('Fluence_data_10k2', Fluence)
+
+            print (Fluence)
+
+            
     
-    np.save('Fluence_data_z', Fluence_z)
+            np.save('Fluence_data_z', Fluence_z)
 
     images = True
     if images == True:
