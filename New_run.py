@@ -367,7 +367,7 @@ if __name__ == '__main__':
         Fluence = A_z / u_a_vals
         Fluence_z = np.sum(Fluence, axis=1)
 
-        inclusion_run = False
+        inclusion_run = True
         if inclusion_run  == True:
         ### Fluence
         
