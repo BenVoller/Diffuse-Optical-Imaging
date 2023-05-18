@@ -124,7 +124,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 100
+    N_grid = 20
 
     
 
@@ -314,12 +314,12 @@ if __name__ == '__main__':
         ### Fluence
         Fluence = A_z / u_a_vals
 
-        np.save('Fluence_data', Fluence)
+        np.save('Fluence_data_10k1', Fluence)
 
         print (Fluence)
 
         Fluence_z = np.sum(Fluence, axis=1)
-
+    
     np.save('Fluence_data_z', Fluence_z)
 
     images = True
