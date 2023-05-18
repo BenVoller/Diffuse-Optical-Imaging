@@ -510,13 +510,16 @@ class photons():
         
         # Checks if the photon is within the inclusion
         
-        in_bounds = False
+        in_bounds = True
         
         for i in range(len(self.pos)):
             neg_side = self.inclusion_center[i] - self.inclusion_size/2
             pos_side = self.inclusion_center[i] + self.inclusion_size/2
-            if self.pos[i] > neg_side and self.pos[i] < pos_side:
-                in_bounds = True
+
+            # Begins with the test as True and then invalidates it otherwise.
+            if self.pos[i] < neg_side or self.pos[i] > pos_side:
+                in_bounds = False
+                
                 
                 
         if in_bounds:

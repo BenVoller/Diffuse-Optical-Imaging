@@ -383,7 +383,7 @@ if __name__ == '__main__':
         
             np.save('Fluence_data_z', Fluence_z)
 
-    images = True
+    images = False
     if images == True:
 
         #plt.figure()

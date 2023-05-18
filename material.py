@@ -81,8 +81,8 @@ class medium():
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [2, 1.4, 0.2525, 254, 0.9] # surrounding layer 1 0.7
-        layer2 = [3, 1.4, 0.2525, 254, 0.9] # inclusion layer     1.7
+        layer1 = [0.7, 1.4, 0.2525, 254, 0.9] # surrounding layer 1 0.7
+        layer2 = [1.7, 1.4, 0.2525, 254, 0.9] # inclusion layer     1.7
         layer3 = [6, 1.4, 0.2525, 254, 0.9]   # surrounding layer 3 semi infinite
         layer4 = [999.9, 1, 1, 1, 0]
 
@@ -98,7 +98,7 @@ class medium():
                                  2:layer3}
         
         # [depth, refractive_index(n), u_a, u_s, g]
-        self.inclusion_center = np.array([0,0,2.5])
+        self.inclusion_center = np.array([0,0,1.2])
         self.inclusion_size = 1
         self.inclusion_properties = [self.inclusion_center[-1],1.3, 1.7049,180,0.9] # inclusion params
         
