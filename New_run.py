@@ -40,6 +40,8 @@ def run(number):
             photon.fresnelReflection() 
             
         while photon.hit_boundary():
+
+            
             
             try:
                 if photon.faces == 'front' or photon.faces == 'back':
@@ -76,6 +78,7 @@ def run(number):
 
        # print ('weight&', photon.W)
         photon.scatter()
+        photon.raman_shift()
         photon.roulette()
         
        
@@ -326,7 +329,7 @@ if __name__ == '__main__':
     
             np.save('Fluence_data_z', Fluence_z)
 
-    images = True
+    images = False
     if images == True:
 
         #plt.figure()

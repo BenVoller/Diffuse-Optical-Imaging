@@ -52,7 +52,9 @@ class photons():
         self.inclusion_size = inclusion_size
         # Denotes if the photon is within the inclusion
         self.in_inclusion = False
+
         
+
 
 
         # Psuedo Random Number for the step size of the photon movement
@@ -105,50 +107,7 @@ class photons():
             self.nt = self.inclusion_properties[1]
             
             
-        
-        
-        
-    def axis_rotation(self):
-        ''' A now redundant function'''
 
-        pos= self.pos
-        vel= self.vel
-
-        if self.face == 'left' or self.face == 'right':
-            # Changes the coordinate system for transmission then returns it
-            # rotates to zxy
-            self.pos = np.array([-pos[2],pos[1],pos[0]], dtype=float)
-            self.vel = np.array([-vel[2],vel[1],vel[0]], dtype=float)
-
-            self.transmission()
-
-            self.pos = np.array([pos[2],pos[1],-pos[0]], dtype=float)
-            self.vel = np.array([vel[2],vel[1],-vel[0]], dtype=float)
-
-
-            
-        elif self.face == 'back' or self.face == 'front':
-            print ('before', self.pos, self.vel)
-            # Changes the coordinate system for transmission then returns it
-            self.pos = np.array([pos[0],pos[2],-pos[1]], dtype=float)
-            self.vel = np.array([vel[0],vel[2],-vel[1]], dtype=float)
-            
-            self.transmission()
-
-            self.pos = np.array([pos[0],-pos[2],pos[1]], dtype=float)
-            self.vel = np.array([vel[0],-vel[2],vel[1]], dtype=float)
-            print('after', self.pos, self.vel)
-        else:
-            print ('It is getting here')
-            self.transmission()
-
-
-        
-        
-
-
-
-        
 
     def Refractive_index(self):
 
@@ -429,7 +388,7 @@ class photons():
             #print('reflection', self.reflectance)
 
         elif self.pos[-1] == self.upper_bound and not self.is_scattered:
-            exit_type = 3, # Tu
+            exit_type = 3 # Tu
             
 
         elif self.pos[-1] == self.upper_bound and self.is_scattered:
@@ -546,8 +505,26 @@ class photons():
     def raman_shift(self):
         # Raman scatters the wavelength of the tissue based on a low random chance 
         # and also a sampling of the makeup of the tissue being investigated.
+        
+        # Checks if the photon is within the inclusion
+        
+        in_bounds = False
+        
+        for i in range(len(self.pos)):
+            neg_side = self.inclusion_center[i] - self.inclusion_size/2
+            pos_side = self.inclusion_center[i] + self.inclusion_size/2
+            if self.pos[i] > neg_side and self.pos[i] < pos_side:
+                in_bounds = True
+                
+                
+        if in_bounds:
+            self.visited_inclusion = True
+            # Sets the raman spectroscopy limit
+            if self.eta() < 1/100000:
+                self.raman_shifted = True
+            
 
-        self.wavelength 
+
 
 
 
