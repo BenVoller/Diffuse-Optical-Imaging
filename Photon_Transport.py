@@ -7,7 +7,7 @@ import time
 from material import *
 
 
-np.random.seed(1234)
+#np.random.seed(1234)
 
 class photons():
 
@@ -480,7 +480,7 @@ class photons():
 
         self.is_scattered = True
         
-        g = self.g # Scattering Anisotropy for most biological tissue 
+        g = self.g # Scattering Anisotropy  biological tissue 
 
         if g != 0:
             theta = np.arccos((1/(2*g))*(1 + g**2 - ((1 - g**2)/(1 - g + 2*g*self.eta()))**2))

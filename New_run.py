@@ -314,7 +314,7 @@ if __name__ == '__main__':
         ### Fluence
         Fluence = A_z / u_a_vals
 
-        np.save('Fluence_data_10k1', Fluence)
+        np.save('Fluence_data_10k2', Fluence)
 
         print (Fluence)
 
@@ -339,6 +339,18 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
+
+        plt.figure()
+        plt.ylabel('Diffuse Reflection $cm^{-2}$')
+        plt.xlabel('Exit radius (cm)')
+        #plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(R_ir_vals, R_dr, 'x')
+
+        plt.figure()
+        plt.ylabel('Diffuse Transmission $cm^{-2}$')
+        plt.xlabel('Exit radius (cm)')
+        #plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(R_ir_vals, T_dr, 'x')
         
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
