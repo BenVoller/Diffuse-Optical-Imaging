@@ -78,7 +78,7 @@ class photons():
         
 
         if self.in_inclusion:
-            print ('Yellow')
+            # print ('Yellow')
             self.visited_inclusion = True
             self.ni = self.inclusion_properties[1]
             self.mu_a = self.inclusion_properties[2]
@@ -519,6 +519,7 @@ class photons():
                 
         if in_bounds:
             self.visited_inclusion = True
+            self.in_inclusion = True
             # Sets the raman spectroscopy limit
             if self.eta() < 1/100000:
                 self.raman_shifted = True

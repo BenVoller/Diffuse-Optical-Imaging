@@ -127,7 +127,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 20
+    N_grid = 200
 
     
 
@@ -185,6 +185,24 @@ if __name__ == '__main__':
     u_a_vals_array = np.ones([len(u_a_vals), len(u_a_vals)])
     for row in range(len(u_a_vals_array)):
         u_a_vals_array[row] *= u_a_vals[row]
+
+   
+    # index coords of where to put the inclusion
+    top_corner = material.inclusion_center - material.inclusion_size
+    # r, c denote the coordinate values of the top corner
+    # Now to find their indexes 
+    r = int(np.digitize([top_corner[-1]], bins_z))
+    c = int(np.digitize([top_corner[1]], bins_x))
+    print ('r,c', r, c)
+
+
+    inclusion_no_bins = material.inclusion_size / delta_z
+    inc_array = np.ones([int(inclusion_no_bins), int(inclusion_no_bins)])*material.inclusion_properties[2]
+    print (inc_array)
+
+    # Inserts the matrix of the u_a vals
+    u_a_vals_array[r:r+inc_array.shape[0], c:c+inc_array.shape[1]] += inc_array
+
 
     print (u_a_vals_array)
 
@@ -316,17 +334,17 @@ if __name__ == '__main__':
         Fluence = A_z / u_a_vals
         Fluence_z = np.sum(Fluence, axis=1)
 
-        inclusion_run = False
+        inclusion_run = True
         if inclusion_run  == True:
         ### Fluence
         
-
+            # Saving the u_a vals allows me to plot the fluence easier
+            np.save('ua_vals', u_a_vals_array)
             np.save('Fluence_data_10k2', Fluence)
 
             print (Fluence)
 
-            
-    
+        
             np.save('Fluence_data_z', Fluence_z)
 
     images = False
