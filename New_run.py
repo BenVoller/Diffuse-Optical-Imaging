@@ -210,6 +210,13 @@ if __name__ == '__main__':
     # empty_listsfor storing weights into 
     diffuse_reflectance = np.zeros([N_grid, N_grid])
     diffuse_transmittance = np.zeros([N_grid, N_grid])
+    inclusion_reflectance = np.zeros([N_grid, N_grid])
+    raman_reflectance = np.zeros([N_grid, N_grid])
+
+    # Number of photons counter that have been in the inclusion and are raman scattered.
+    inclusion_photons = 0 
+    raman_photons = 0 
+
     unscat_reflectance = 0
     unscat_transmittance = 0
 
@@ -254,11 +261,18 @@ if __name__ == '__main__':
             if data['exit_type'] == 1:
                 # Unscattered Refelctance
                 unscat_reflectance += data['W']
-
+                print(data)
 
             elif data['exit_type'] == 2:
                 # Diffuse Reflectance
                 diffuse_reflectance[r_bin-1][angle_bin-1] += data['W']
+                if data['in_inclusion'] == True:
+                    inclusion_reflectance[r_bin-1][angle_bin-1] += data['W']
+                    inclusion_photons +=1
+                    if data['raman_shift'] == True:
+                        raman_reflectance[r_bin-1][angle_bin-1] += data['W']
+                        raman_photons += 1
+
 
             elif data['exit_type'] == 3:
                 # Unscattered Transmission
@@ -307,25 +321,44 @@ if __name__ == '__main__':
         
         print ('parallel time: ', t1 - t0)
 
+        # Transmittance
         r_transmittance = np.sum(diffuse_transmittance, axis=1)
         angle_transmittance = np.sum(diffuse_transmittance, axis=0)
 
+        #Reflectance
         r_reflectance = np.sum(diffuse_reflectance, axis=1)
         angle_reflectance = np.sum(diffuse_reflectance, axis=0)
 
+        # Inclusion photons
+        r_inclusion = np.sum(inclusion_reflectance, axis=1)
+        angle_inclusion = np.sum(inclusion_reflectance, axis=0)
+
+        # Raman Photons
+        r_raman = np.sum(raman_reflectance, axis=1)
+        angle_raman = np.sum(raman_reflectance, axis=0)
+
         T_tot = np.sum(diffuse_transmittance)
         R_tot = np.sum(diffuse_reflectance)
+        inclusion_tot = np.sum(inclusion_reflectance)
+        raman_tot = np.sum(raman_reflectance)
 
-        print (T_tot/numberPhotons, R_tot/numberPhotons)
+        print ('Td', T_tot/numberPhotons, 'Rd', R_tot/numberPhotons)
+        print ('inclusion', inclusion_tot/numberPhotons)
+        print ('Raman', raman_tot/ numberPhotons)
+     
 
         # Raw R_dr and T_dr are converted to probablities of reimission per unit unit area 
         R_dr = r_reflectance / (numberPhotons*delta_a)
         T_dr = r_transmittance / (numberPhotons*delta_a)
+        inclusion_dr = r_inclusion / (numberPhotons*delta_a)
+        raman_dr = r_raman / (numberPhotons*delta_a)
 
 
         # Raw R_da and T_da are converted to reimission per solid angle
         R_da = angle_reflectance / (numberPhotons*delta_omega)
         T_da = angle_transmittance / (numberPhotons*delta_omega)
+        inclusion_da = angle_inclusion / (numberPhotons*delta_omega)
+        raman_da = angle_raman / (numberPhotons*delta_omega)
 
         # Convert raw absorption data to physical quantity
         A_z = absorption_weights / numberPhotons * delta_z 
@@ -334,20 +367,23 @@ if __name__ == '__main__':
         Fluence = A_z / u_a_vals
         Fluence_z = np.sum(Fluence, axis=1)
 
-        inclusion_run = True
+        inclusion_run = False
         if inclusion_run  == True:
         ### Fluence
         
             # Saving the u_a vals allows me to plot the fluence easier
             np.save('ua_vals', u_a_vals_array)
             np.save('Fluence_data_10k2', Fluence)
-
+            np.savez('Transmission_data', alpha_ia_vals, T_da, R_ir_vals, T_dr)
+            np.savez('Reflectance_data', alpha_ia_vals, R_da, R_ir_vals, R_dr)
+            np.savez('raman_data', alpha_ia_vals, inclusion_da, R_ir_vals, inclusion_dr)
+            np.savez('raman_data', alpha_ia_vals, raman_da, R_ir_vals, raman_dr)
             print (Fluence)
 
         
             np.save('Fluence_data_z', Fluence_z)
 
-    images = False
+    images = True
     if images == True:
 
         #plt.figure()

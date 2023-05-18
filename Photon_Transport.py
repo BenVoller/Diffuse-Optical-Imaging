@@ -14,6 +14,9 @@ class photons():
     def __init__(self, medium,inclusion_size, inclusion_center, weight):
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
+
+        
+        self.W = weight 
         # These will record the values used to analyse the validity of the solver
         # Will soon need to also include wavelength.
         self.unsc_reflectance = 0 
@@ -23,6 +26,9 @@ class photons():
 
         # Will trigger once one none boundary scattering event occurs
         self.is_scattered = False
+        # Initialises that no photons have visited the inclusion
+        self.visited_inclusion = False
+        self.raman_shifted = False
 
         self.alive = True 
         
@@ -31,12 +37,6 @@ class photons():
 
         # Extinction coefficient cm^-1
 
-        self.W = weight 
-
-        # Initialises that no photons have visited the inclusion
-        self.visited_inclusion = False
-        
-    
         self.layers = medium.layers
         
         
@@ -407,7 +407,8 @@ class photons():
                         'angle':angle,
                         'W':self.W,
                         'exit_type':exit_type,
-                        'in_inclusion': self.visited_inclusion}
+                        'in_inclusion': self.visited_inclusion,
+                        'raman_shift': self.raman_shifted}
             self.W = 0 
 
         except:
@@ -490,7 +491,8 @@ class photons():
                               'angle':0,
                               'W':self.W,
                               'exit_type': 5,
-                              'in_inclusion': self.visited_inclusion} # 5 corresponds to Absorbed Ab
+                              'in_inclusion': self.visited_inclusion, 
+                              'raman_shifted': self.raman_shifted} # 5 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
@@ -523,6 +525,9 @@ class photons():
             # Sets the raman spectroscopy limit
             if self.eta() < 1/100000:
                 self.raman_shifted = True
+
+        else:
+            self.in_inclusion = False
             
 
 

@@ -10,6 +10,9 @@ u_a_array = np.load('ua_vals.npy')
 
 data = data1 + data2
 
+keep = False
+if keep == True:
+    np.save('Fluence_keep', data)
 
 material = medium()
 
