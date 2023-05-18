@@ -124,7 +124,7 @@ if __name__ == '__main__':
     
     # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-    N_grid = 100
+    N_grid = 20
 
     
 
@@ -271,8 +271,8 @@ if __name__ == '__main__':
 
                 
             
-            #absorption_weights += (scattered_absorption + unscattered_absor[tion)
-            absorption_weights += scattered_absorption
+                #absorption_weights += (scattered_absorption + unscattered_absor[tion)
+                absorption_weights += scattered_absorption
         
             # photon_data = np.vstack([photon_data, data])
 
@@ -310,17 +310,21 @@ if __name__ == '__main__':
         A_z = absorption_weights / numberPhotons * delta_z 
         Total_absorption = np.sum(A_z)
 
-
-        ### Fluence
         Fluence = A_z / u_a_vals
-
-        np.save('Fluence_data', Fluence)
-
-        print (Fluence)
-
         Fluence_z = np.sum(Fluence, axis=1)
 
-    np.save('Fluence_data_z', Fluence_z)
+        inclusion_run = False
+        if inclusion_run  == True:
+        ### Fluence
+        
+
+            np.save('Fluence_data_10k2', Fluence)
+
+            print (Fluence)
+
+            
+    
+            np.save('Fluence_data_z', Fluence_z)
 
     images = True
     if images == True:
@@ -339,6 +343,18 @@ if __name__ == '__main__':
         plt.xlabel('Exit angle (rad)')
         plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(alpha_ia_vals, T_da, 'x')
+
+        plt.figure()
+        plt.ylabel('Diffuse Reflection $cm^{-2}$')
+        plt.xlabel('Exit radius (cm)')
+        #plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(R_ir_vals, R_dr, 'x')
+
+        plt.figure()
+        plt.ylabel('Diffuse Transmission $cm^{-2}$')
+        plt.xlabel('Exit radius (cm)')
+        #plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
+        plt.plot(R_ir_vals, T_dr, 'x')
         
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')

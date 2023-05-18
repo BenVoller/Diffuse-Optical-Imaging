@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from material import medium
 
-data = np.load('Fluence_data.npy')
+data1 = np.load('Fluence_data_10k1.npy')
 z_data = np.load('Fluence_data_z.npy')
+
+data = data1
 
 material = medium()
 
