@@ -32,6 +32,9 @@ class photons():
         # Extinction coefficient cm^-1
 
         self.W = weight 
+
+        # Initialises that no photons have visited the inclusion
+        self.visited_inclusion = False
         
     
         self.layers = medium.layers
@@ -74,9 +77,10 @@ class photons():
 
         if self.in_inclusion:
             print ('Yellow')
+            self.visited_inclusion = True
             self.ni = self.inclusion_properties[1]
             self.mu_a = self.inclusion_properties[2]
-            self.mu_a = self.inclusion_properties[3]
+            self.mu_s = self.inclusion_properties[3]
             self.g = self.inclusion_properties[4]
         
 
@@ -428,7 +432,6 @@ class photons():
             exit_type = 3, # Tu
             
 
-
         elif self.pos[-1] == self.upper_bound and self.is_scattered:
             exit_type = 4 # Td
             #print('transmittance', self.transmittance)
@@ -444,7 +447,8 @@ class photons():
                         'r':r,
                         'angle':angle,
                         'W':self.W,
-                        'exit_type':exit_type}
+                        'exit_type':exit_type,
+                        'in_inclusion': self.visited_inclusion}
             self.W = 0 
 
         except:
@@ -526,7 +530,8 @@ class photons():
                               'r':0,
                               'angle':0,
                               'W':self.W,
-                              'exit_type': 5} # 4 corresponds to Absorbed Ab
+                              'exit_type': 5,
+                              'in_inclusion': self.visited_inclusion} # 5 corresponds to Absorbed Ab
                 self.W = 0
                 self.alive = False
                 
