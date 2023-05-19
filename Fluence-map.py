@@ -4,15 +4,21 @@ from matplotlib import cm
 from material import medium
 
 data1 = np.load('Fluence_data_10k1.npy')
+data2 = np.load('Fluence_data_10k2.npy')
 z_data = np.load('Fluence_data_z.npy')
+u_a_array = np.load('ua_vals.npy')
 
-data = data1
+data = data1 + data2
+
+keep = False
+if keep == True:
+    np.save('Fluence_keep', data)
 
 material = medium()
 
 # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-N_grid = 100
+N_grid = 200
 
 # size of Grid elements
 delta_z = material.depth / N_grid
