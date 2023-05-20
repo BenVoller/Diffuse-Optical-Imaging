@@ -140,8 +140,8 @@ class photons():
                 # Sets the layers based on direction = 1
                 
                 
-                self.ni = self.layers[i-1][1]
-                self.nt = self.layers[i][1]
+                self.ni = self.layers[i][1]
+                self.nt = self.layers[i+1][1]
                 self.zt = self.layers[i][0]
                 self.db = (self.zt - z) / self.vel[-1]
                 break
@@ -160,6 +160,7 @@ class photons():
                     self.db = 99999
                     
                     
+                    
 
                 # Checking if the nearest boundary is current position
                 # in which case it is set to a the one lower
@@ -167,8 +168,8 @@ class photons():
 
                 if self.zt == z:
                     # print ('is this triggering')
-                    self.ni = self.layers[i-1][1]
-                    self.nt = self.layers[i-2][1]
+                    self.ni = self.layers[i][1]
+                    self.nt = self.layers[i-1][1]
                     self.zt = self.layers[i-2][0]
                     # Accounts that this is immediately moving out of the layer 
                     self.current_layer = self.layers[i-1]
@@ -182,10 +183,17 @@ class photons():
                 # Sets the distance to the boundary in the z direction
                 self.db = (self.zt - z) / self.vel[-1]
                 
-
+                
+                print (self.pos, direction)
+                print ('a', self.mu_a)
+                print ('s', self.mu_s)
+                print ('g', self.g)
+                print ('zt', self.zt)
+                time.sleep(1)
                 break
+        
 
-            
+
     
 
 
@@ -289,8 +297,16 @@ class photons():
         # Now check is the photon packet is reflected or transmitted. 
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
+            
+            '''
+            print ('ni', self.ni, self.nt)
             self.vel[-1] = -self.vel[-1]
-            print ('oh dear')
+            print ('------')
+            print (self.current_layer)
+            print (alpha_i,self.pos, self.vel, Ri)
+            time.sleep(5)
+            '''
+            
             
             
         #####I think this may be redundant

@@ -7,11 +7,11 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 10000
+        self.NumberPhotons = 1000
 
 
         
-        
+        '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
@@ -39,7 +39,7 @@ class medium():
         
         #self.inclusion_layer = 0
         #self.depth = 20
-        
+        '''
     
         '''
         # [depth, refractive_index(n), u_a, u_s, g]
@@ -109,7 +109,7 @@ class medium():
 
 
         
-        '''
+        
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]         # Air
@@ -154,7 +154,7 @@ class medium():
         self.inclusion_center = np.array([100,0,0.5])
         self.inclusion_size = 0.5
         self.inclusion_properties = [self.inclusion_center[-1],1.39, 1.427, 145.625, 0.818]
-        '''
+        
         
     def inclusion(self, size, center_point):
 
