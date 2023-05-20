@@ -290,6 +290,7 @@ class photons():
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
             self.vel[-1] = -self.vel[-1]
+            print ('oh dear')
             
             
         #####I think this may be redundant

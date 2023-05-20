@@ -138,7 +138,7 @@ if __name__ == '__main__':
         
         # Number of grid elements set at 5 - 10% such that it minimises relative error while 
         # maintaining good resolution.
-        N_grid = 20
+        N_grid = 200
 
         
 
@@ -383,20 +383,20 @@ if __name__ == '__main__':
 
             reflection = True
             if reflection == True:
-                np.savez('Transmission_data_iso', alpha_ia_vals, T_da, R_ir_vals, T_dr)
-                np.savez('Reflectance_data_iso', alpha_ia_vals, R_da, R_ir_vals, R_dr)
-                np.savez('raman_data', alpha_ia_vals, inclusion_da, R_ir_vals, inclusion_dr)
-                np.savez('raman_data', alpha_ia_vals, raman_da, R_ir_vals, raman_dr)
+                #np.savez('Transmission_data_iso', a=alpha_ia_vals, b=T_da, c=R_ir_vals, d=T_dr)
+                #np.savez('Reflectance_data_iso', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
+                #np.savez('raman_data', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
+                #np.savez('raman_data', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
+                np.savez('Fluence_data_z_1.37', a=Z_i_vals, b=Fluence_z)
 
-
-            inclusion_run = False
+            inclusion_run = False 
             if inclusion_run  == True:
             ### Fluence
                 # Saving the u_a vals allows me to plot the fluence easier
                 np.save('ua_vals', u_a_vals_array)
                 np.save('Fluence_data_10k2', Fluence)
                 print (Fluence)
-                np.save('Fluence_data_z', Fluence_z)
+                
 
                 # g=0.9 and isotropic
                 
