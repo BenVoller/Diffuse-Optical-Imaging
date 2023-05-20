@@ -391,8 +391,10 @@ if __name__ == '__main__':
                 #np.savez('Reflectance_data_iso', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
                 #np.savez('raman_data', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
                 #np.savez('raman_data', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
+                np.savez('Fluence_data_z', a=Z_i_vals, b=Fluence_z)
                 #np.savez('Fluence_data_z_1.37', a=Z_i_vals, b=Fluence_z)
-                np.savez('Fluence_data_z_skin', a=Z_i_vals, b=Fluence_z)
+                #np.savez('Fluence_data_z_skin', a=Z_i_vals, b=Fluence_z)
+                
 
             inclusion_run = False 
             if inclusion_run  == True:
@@ -414,7 +416,7 @@ if __name__ == '__main__':
 
     np.savez
 
-    images = True
+    images = False
     if images == True:
 
         #plt.figure()

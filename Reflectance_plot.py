@@ -17,14 +17,23 @@ fluence_z = data_fluence['b']
 fluence_z137 = data_fluence1_37['b']
 
 
-fig, ax = plt.subplots()
-plt.plot(R_ir_vals, np.log(R_dr_forward), 'xb')
-plt.plot(R_ir_vals, np.log(R_dr_iso), 'xr')
 
 
 
-plt.figure()
-plt.plot(R_ir_vals, ((R_dr_iso - R_dr_forward)/R_dr_forward), 'x')
+# Create two subplots and unpack the output array immediately
+fig, (ax1, ax2) = plt.subplots(2, 1)
+ax1.plot(R_ir_vals, np.log(R_dr_forward), 'xb')
+ax1.plot(R_ir_vals, np.log(R_dr_iso), 'xr')
+ax1.set_xlabel('Radius [cm]')
+ax1.set_ylabel('R_d')
+
+ax2.plot(R_ir_vals, ((R_dr_iso - R_dr_forward)/R_dr_forward), 'x')
+ax2.set_ylabel('Relative Error')
+ax2.set_xlabel('Radius [cm]')
+
+fig.tight_layout()
+
+
 
 n=40
 plt.figure()

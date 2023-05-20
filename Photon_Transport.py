@@ -75,10 +75,7 @@ class photons():
         self.Refractive_index()
         #print ('pos', self.pos, 'vel', self.vel)
         #print ('in inclusion', self.in_inclusion)
-        print (self.pos)
-        print (self.current_coeffs)
-        print (self.nt)
-        time.sleep(5)
+      
 
         if self.in_inclusion:
             # print ('Yellow')
@@ -294,8 +291,17 @@ class photons():
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
             #print (Ri)
+            '''
+            print (Ri)
+            print (alpha_i)
+            print (self.pos, self.vel)
+            print ('ni', self.ni)
+            print ('nt', self.nt)
+            print ('zt', self.zt)
+            time.sleep(5)
+            '''
             self.vel[-1] = -self.vel[-1]
-            
+           
             
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
