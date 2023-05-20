@@ -17,7 +17,7 @@ fluence_z = data_fluence['b']
 fluence_z137 = data_fluence1_37['b']
 
 
-plt.figure()
+fig, ax = plt.subplots()
 plt.plot(R_ir_vals, np.log(R_dr_forward), 'xb')
 plt.plot(R_ir_vals, np.log(R_dr_iso), 'xr')
 

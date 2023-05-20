@@ -75,7 +75,10 @@ class photons():
         self.Refractive_index()
         #print ('pos', self.pos, 'vel', self.vel)
         #print ('in inclusion', self.in_inclusion)
-        
+        print (self.pos)
+        print (self.current_coeffs)
+        print (self.nt)
+        time.sleep(5)
 
         if self.in_inclusion:
             # print ('Yellow')
@@ -155,13 +158,10 @@ class photons():
                 self.zt = self.layers[i-1][0]
 
                 # Checking if the photon is exciting
-                if z == 0:
+                if z == self.lower_bound:
                     # print('This should have happened')
                     self.exiting = True
                     self.db = 99999
-                    self.ni = self.layers[1][1]
-                    self.nt = self.layers[-1][1]
-                    break
                     
                     
 
@@ -186,18 +186,7 @@ class photons():
                 # Sets the distance to the boundary in the z direction
                 self.db = (self.zt - z) / self.vel[-1]
                 
-<<<<<<< Updated upstream
 
-=======
-                '''
-                print (self.pos, direction)
-                print ('a', self.mu_a)
-                print ('s', self.mu_s)
-                print ('g', self.g)
-                print ('zt', self.zt)
-                '''
-                
->>>>>>> Stashed changes
                 break
 
             
@@ -233,8 +222,6 @@ class photons():
             self.pos[-1] = self.zt
             
             
-
-            
             
 
             
@@ -266,7 +253,7 @@ class photons():
         
         self.pos = self.pos + self.vel*(self.s_/self.mu_t)
         self.s_ = 0
-        
+
     
         # Finds the refractive index of the initial layer and that of the new layer
 
@@ -306,14 +293,8 @@ class photons():
         # Now check is the photon packet is reflected or transmitted. 
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
-<<<<<<< Updated upstream
-=======
-            self.pos[-1] = -self.pos[-1]
-            '''
-            print ('ni', self.ni, self.nt)
->>>>>>> Stashed changes
+            #print (Ri)
             self.vel[-1] = -self.vel[-1]
-            print ('oh dear')
             
             
         #####I think this may be redundant
