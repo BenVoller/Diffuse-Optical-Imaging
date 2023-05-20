@@ -7,16 +7,16 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 1000
+        self.NumberPhotons = 50000
 
 
         
-        
+        '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.01, 1, 10, 90, 0.75]
-        layer2 = [0.02, 1, 10, 90, 0.75]
+        layer1 = [1, 1.37, 0.1, 100, 0.9]
+        layer2 = [2, 1.37, 0.1, 100, 0.9] 
         layer3 = [99999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -28,7 +28,7 @@ class medium():
         self.layers_important = {0:layer1,
                                  1:layer2,}
         
-        self.depth = 0.02
+        self.depth = 2
         
         
         
@@ -39,40 +39,36 @@ class medium():
         
         #self.inclusion_layer = 0
         #self.depth = 20
-        
-    
         '''
+    
+        
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [1, 1, 0.1, 90, 0.9]
-        layer2 = [5, 1, 0.1, 90, 0.9]
-        layer3 = [10, 1, 0.1, 90, 0.9]
-        layer4 = [99999.9, 1, 1, 1, 0]
+        layer1 = [1, 1, 0.1, 100, 0.9]
+        layer2 = [2, 1, 0.1, 100, 0.9]
+        layer2 = [99999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
                        0:layer0,
                        1:layer1,
-                       2:layer2,
-                       3:layer3,
-                       4:layer4}
+                       2:layer2}
         
         self.layers_important = {0:layer1,
-                                 1:layer2,
-                                 2:layer3}
+                                 1:layer2}
         
-        self.depth = 10
+        self.depth = 2
         
         
         
         # [depth, refractive_index(n), u_a, u_s, g]
-        self.inclusion_center = np.array([100,0,5.5])
+        self.inclusion_center = np.array([100,0,1])
         self.inclusion_size = 0.5
         self.inclusion_properties = [self.inclusion_center[-1],1,10,90,0.75]
         
         #self.inclusion_layer = 0
-        #self.depth = 20
-        '''
+        
+        
         #______________________________________________________
         #------------------------------------------------------
         #______________________________________________________
@@ -117,7 +113,7 @@ class medium():
         layer2 = [0.009, 1.4, 1.3, 176.125, 0.8]              # Epidermis 
         layer3 = [0.019, 1.4, 1.05, 106.25, 0.8]               # Papliary Dermis
         layer4 = [0.027, 1.39, 1.427, 145.625, 0.818]         # Upper Blood Plexus
-        layer5 = [0.177, 1.4, 1.05, 1106.25, 0.8]              # Reticular Dermis
+        layer5 = [0.177, 1.4, 1.05, 106.25, 0.8]              # Reticular Dermis
         layer6 = [0.184, 1.34, 4.443, 460.625, 0.962]         # Deep Blood Plexus
         layer7 = [0.200, 1.4, 1.05, 106.25, 0.8]              # Lower Dermis
         layer8 = [0.500, 1.46, 0.975, 97.125, 0.8]
