@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 1000
+        self.NumberPhotons = 5000
 
 
         
@@ -15,8 +15,8 @@ class medium():
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [0.01, 1, 10, 90, 0.75]
-        layer2 = [0.02, 1, 10, 90, 0.75]
+        layer1 = [1, 1, 0.1, 90, 0]
+        layer2 = [5, 1, 0.1, 90, 0]
         layer3 = [99999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -28,7 +28,7 @@ class medium():
         self.layers_important = {0:layer1,
                                  1:layer2,}
         
-        self.depth = 0.02
+        self.depth = 5
         
         
         
