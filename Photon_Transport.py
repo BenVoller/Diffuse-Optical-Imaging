@@ -92,7 +92,8 @@ class photons():
                                                                    size = self.inclusion_size,
                                                                    position=self.pos, 
                                                                    velocity=self.vel)
-
+        
+            
         #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
             #print ('WHAT UP')
@@ -140,8 +141,8 @@ class photons():
                 # Sets the layers based on direction = 1
                 
                 
-                self.ni = self.layers[i][1]
-                self.nt = self.layers[i+1][1]
+                self.ni = self.layers[i-1][1]
+                self.nt = self.layers[i][1]
                 self.zt = self.layers[i][0]
                 self.db = (self.zt - z) / self.vel[-1]
                 break
@@ -154,11 +155,13 @@ class photons():
                 self.zt = self.layers[i-1][0]
 
                 # Checking if the photon is exciting
-                if z == self.lower_bound:
+                if z == 0:
                     # print('This should have happened')
                     self.exiting = True
                     self.db = 99999
-                    
+                    self.ni = self.layers[1][1]
+                    self.nt = self.layers[-1][1]
+                    break
                     
                     
 
@@ -168,8 +171,8 @@ class photons():
 
                 if self.zt == z:
                     # print ('is this triggering')
-                    self.ni = self.layers[i][1]
-                    self.nt = self.layers[i-1][1]
+                    self.ni = self.layers[i-1][1]
+                    self.nt = self.layers[i-2][1]
                     self.zt = self.layers[i-2][0]
                     # Accounts that this is immediately moving out of the layer 
                     self.current_layer = self.layers[i-1]
@@ -183,17 +186,21 @@ class photons():
                 # Sets the distance to the boundary in the z direction
                 self.db = (self.zt - z) / self.vel[-1]
                 
-                
+<<<<<<< Updated upstream
+
+=======
+                '''
                 print (self.pos, direction)
                 print ('a', self.mu_a)
                 print ('s', self.mu_s)
                 print ('g', self.g)
                 print ('zt', self.zt)
-                time.sleep(1)
+                '''
+                
+>>>>>>> Stashed changes
                 break
-        
 
-
+            
     
 
 
@@ -226,6 +233,8 @@ class photons():
             self.pos[-1] = self.zt
             
             
+
+            
             
 
             
@@ -257,7 +266,7 @@ class photons():
         
         self.pos = self.pos + self.vel*(self.s_/self.mu_t)
         self.s_ = 0
-
+        
     
         # Finds the refractive index of the initial layer and that of the new layer
 
@@ -297,16 +306,14 @@ class photons():
         # Now check is the photon packet is reflected or transmitted. 
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
-            
+<<<<<<< Updated upstream
+=======
+            self.pos[-1] = -self.pos[-1]
             '''
             print ('ni', self.ni, self.nt)
+>>>>>>> Stashed changes
             self.vel[-1] = -self.vel[-1]
-            print ('------')
-            print (self.current_layer)
-            print (alpha_i,self.pos, self.vel, Ri)
-            time.sleep(5)
-            '''
-            
+            print ('oh dear')
             
             
         #####I think this may be redundant

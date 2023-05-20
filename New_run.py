@@ -41,15 +41,17 @@ def run(number):
             photon.fresnelReflection() 
             
         while photon.hit_boundary():
-
+            
             
             
             try:
                 if photon.faces == 'front' or photon.faces == 'back':
+                    photon.nt = photon.current_coeffs[1]
                     photon.transmission_x_plane()
                     print ('x_plane')
 
                 elif photon.faces == 'left' or photon.faces == 'right':
+                    photon.nt = photon.current_coeffs[1]
                     photon.transmission_y_plane()
                     print('yplane')
             
@@ -58,16 +60,18 @@ def run(number):
 
 
             photon.Coefficient_check()
+            
 
         if photon.pos[-1] < 0:
             print('here we go again') 
+            
         
         if photon.W == 0:
             
             return photon.final, absorption
         #print ('*weight',photon.W)
 
-        
+      
         photon.move()
         
         photon.absorb()
