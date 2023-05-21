@@ -45,19 +45,26 @@ def run(number):
             
             
             try:
-                if photon.faces == 'front' or photon.faces == 'back':
+                if photon.face == 'front' or photon.face == 'back':
                     photon.nt = photon.current_coeffs[1]
                     photon.transmission_x_plane()
-                    print ('x_plane')
+                    #print ('x_plane')
 
-                elif photon.faces == 'left' or photon.faces == 'right':
+                elif photon.face == 'left' or photon.face == 'right':
                     photon.nt = photon.current_coeffs[1]
                     photon.transmission_y_plane()
-                    print('yplane')
+                    #print('yplane')
+
             
+                else:
+                    # print ('_______________happening')
+                    photon.transmission()
             except:
+                print ('run excpetion occurred')
                 photon.transmission()
 
+            photon.inclusion_dist = 0 
+            photon.face = 0
 
             photon.Coefficient_check()
             
@@ -253,13 +260,13 @@ if __name__ == '__main__':
         
             # execute tasks in order
             for data, absorption in pool.map(run, range(numberPhotons)):
-
                 '''
-            #  Linear computation for bugfixing
+            # Linear computation for bugfixing
             for i in range(numberPhotons):
                 # The data is in the form  ['x','y','z','vx','vy', 'vz', 'weight','type']
                 data, absorption = run(i)
-                '''    
+                '''
+                
 
                 # Assigns a bin number to the data so that the weight can be stored
                 
@@ -388,20 +395,20 @@ if __name__ == '__main__':
             reflection = True
             if reflection == True:
                 #np.savez('Transmission_data_iso', a=alpha_ia_vals, b=T_da, c=R_ir_vals, d=T_dr)
-                #np.savez('Reflectance_data_iso', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
-                #np.savez('raman_data', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
-                #np.savez('raman_data', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
-                np.savez('Fluence_data_z', a=Z_i_vals, b=Fluence_z)
-                #np.savez('Fluence_data_z_1.37', a=Z_i_vals, b=Fluence_z)
+                np.savez('Reflectance_data_inc', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
+                np.savez('inclusion_data', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
+                np.savez('raman_data', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
+                # np.savez('Fluence_data_z', a=Z_i_vals, b=Fluence_z)
+                # np.savez('Fluence_data_z_1.37', a=Z_i_vals, b=Fluence_z)
                 #np.savez('Fluence_data_z_skin', a=Z_i_vals, b=Fluence_z)
                 
 
-            inclusion_run = False 
+            inclusion_run = True 
             if inclusion_run  == True:
             ### Fluence
                 # Saving the u_a vals allows me to plot the fluence easier
                 np.save('ua_vals', u_a_vals_array)
-                np.save('Fluence_data_10k2', Fluence)
+                np.savez('Fluence_data_10k', a=Fluence, b=A_z)
                 print (Fluence)
                 
 
@@ -416,12 +423,12 @@ if __name__ == '__main__':
 
     np.savez
 
-    images = False
+    images = True
     if images == True:
 
         #plt.figure()
         #plt.pcolormesh([Z_i_vals, X_i_vals,], Fluence)
-        
+        '''
         plt.figure()
         plt.ylabel('Diffuse Reflectance $sr^{-1}$')
         plt.xlabel('Exit angle (rad)')
@@ -445,7 +452,7 @@ if __name__ == '__main__':
         plt.xlabel('Exit radius (cm)')
         #plt.xticks(np.arange(0, np.pi/2+1, step=(np.pi/10)), ['0','0.1π','0.2π','0.3π','0.4π', '0.5π'])
         plt.plot(R_ir_vals, T_dr, 'x')
-        
+        '''
         plt.figure()
         plt.plot(Z_i_vals, Fluence_z, 'x')
         plt.xlabel('z depth')

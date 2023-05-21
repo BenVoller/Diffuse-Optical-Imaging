@@ -7,7 +7,7 @@ class medium():
         
         # refractive indexes
 
-        self.NumberPhotons = 50000
+        self.NumberPhotons = 10000
 
 
         
@@ -15,8 +15,8 @@ class medium():
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
-        layer1 = [1, 1.37, 0.1, 100, 0.9]
-        layer2 = [2, 1.37, 0.1, 100, 0.9] 
+        layer1 = [0.5, 1, 0.1, 100, 0.9]
+        layer2 = [2, 1, 0.1, 100, 0.9] 
         layer3 = [99999.9, 1, 1, 1, 0]
 
         self.layers = {-1:layer_null,
@@ -41,7 +41,7 @@ class medium():
         #self.depth = 20
         '''
     
-        
+        '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-99999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
@@ -67,14 +67,41 @@ class medium():
         self.inclusion_properties = [self.inclusion_center[-1],1,10,90,0.75]
         
         #self.inclusion_layer = 0
-        
+        '''
         
         #______________________________________________________
         #------------------------------------------------------
         #______________________________________________________
 
-        '''
+        
         # Inclusion data
+        # [depth, refractive_index(n), u_a, u_s, g]
+        layer_null = [-999.9, 1, 1, 1, 0]
+        layer0 = [float(0), 1, 1, 1, 0]
+        layer1 = [5, 1.4, 0.2525, 254, 0.9] # surrounding layer 1 0.7 
+        layer2 = [6, 1.4, 0.2525, 254, 0.9]
+        layer3 = [999.9, 1, 1, 1, 0]
+
+        self.layers = {-1:layer_null,
+                       0:layer0,
+                       1:layer1,
+                       2:layer2,
+                       3:layer3}
+        
+        self.layers_important = {0:layer1,
+                                 1:layer2}
+        
+        # [depth, refractive_index(n), u_a, u_s, g]
+        self.inclusion_center = np.array([0,0,1.2])
+        self.inclusion_size = 1
+        self.inclusion_properties = [self.inclusion_center[-1],1.3, 1.7049,180,0.9] # inclusion params
+        self.inclusion_layer = layer1
+        
+        #self.inclusion_layer = 0
+        self.depth = 6
+        '''
+
+         # Inclusion data
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
         layer0 = [float(0), 1, 1, 1, 0]
@@ -101,10 +128,9 @@ class medium():
         
         #self.inclusion_layer = 0
         self.depth = 6
+        
         '''
 
-
-        
         '''
         # [depth, refractive_index(n), u_a, u_s, g]
         layer_null = [-999.9, 1, 1, 1, 0]
@@ -150,6 +176,7 @@ class medium():
         self.inclusion_center = np.array([100,0,0.5])
         self.inclusion_size = 0.5
         self.inclusion_properties = [self.inclusion_center[-1],1.39, 1.427, 145.625, 0.818]
+        
         '''
         
     def inclusion(self, size, center_point):

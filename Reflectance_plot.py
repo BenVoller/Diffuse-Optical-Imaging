@@ -35,10 +35,11 @@ fig.tight_layout()
 
 
 
-n=40
+n=100
 plt.figure()
 plt.plot(Z_i_vals[:n], np.log(fluence_z[:n]), 'xb')
 plt.plot(Z_i_vals[:n], np.log(fluence_z137[:n]), 'xr')
+#plt.plot(Z_i_vals[:n], -1.8*Z_i_vals[:n] +1.2, 'g')
 plt.xlabel('Z Depth [cm]')
 plt.ylabel('Fluence [-]')
 

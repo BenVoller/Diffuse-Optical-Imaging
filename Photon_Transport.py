@@ -46,10 +46,11 @@ class photons():
         
         # Defines the planes of the inclusion as a list of dictionaries
         
-        self.inclusion, self.inclusion_layer = medium.inclusion(inclusion_size, inclusion_center)
+        self.inclusion, self.inclusion_layer_index = medium.inclusion(inclusion_size, inclusion_center)
         self.inclusion_properties = medium.inclusion_properties
         self.inclusion_center = inclusion_center
         self.inclusion_size = inclusion_size
+        self.inclusion_layer = medium.inclusion_layer
         # Denotes if the photon is within the inclusion
         self.in_inclusion = False
 
@@ -97,6 +98,15 @@ class photons():
         #print ('inclusion distance', inclusion_dist)
         if inclusion_dist < self.db and not self.exiting:
             #print ('WHAT UP')
+            self.inclusion_bound = True
+            # Find the intersection position
+            int_pos = self.pos + self.vel*inclusion_dist
+
+            self.zt = np.round(int_pos[-1], 1)
+            
+            # print ('Hitting Inclusion')
+            
+            
             '''
             print (self.pos, self.vel, self.W)
             print (self.current_coeffs)
@@ -104,8 +114,28 @@ class photons():
             print (inclusion_dist, '<', self.db)
             print ('----', self.inclusion_properties)
             '''
+            if self.in_inclusion:
+                self.ni = self.inclusion_properties[1]
+                self.mu_a = self.inclusion_properties[2]
+                self.mu_s = self.inclusion_properties[3]
+                self.g = self.inclusion_properties[4]
+                self.nt = self.inclusion_layer[1]
+                
+            
+            if not self.in_inclusion:
+                self.nt = self.inclusion_properties[1]
+                self.ni = self.inclusion_layer[1]
+                self.mu_a = self.inclusion_layer[2]
+                self.mu_s = self.inclusion_layer[3]
+                self.g = self.inclusion_layer[4]
+
             self.db = inclusion_dist
-            self.nt = self.inclusion_properties[1]
+        
+        else:
+            self.inclusion_bound = False
+        
+            
+            
             
             
 
@@ -159,7 +189,7 @@ class photons():
                     # print('This should have happened')
                     self.exiting = True
                     self.db = 99999
-                    
+
                     
 
                 # Checking if the nearest boundary is current position
@@ -192,6 +222,7 @@ class photons():
 
     def hit_boundary(self):
         
+        self.mu_t = self.mu_a + self.mu_s
         #print(self.pos, self.vel,(self.s_/self.mu_t),self.zt, self.is_scattered)
 
         # Calls the Refractive index function to find the position and location of the next boundary
@@ -214,14 +245,37 @@ class photons():
                 print ('db', self.db)
                 print (self.pos)
                 print (testing)
-            '''   
-            self.pos += self.vel*self.db
-            self.pos[-1] = self.zt
-            
-            
-            
 
+            '''  
+
+            '''print (self.exiting)
+            print(self.pos, self.vel)
+            print (self.pos + self.vel*self.db)'''
+            self.pos += self.vel*self.db
             
+                #time.sleep(4)
+            if self.inclusion_bound:
+                if self.face == 'left' or self.face == 'right':
+                    self.pos[0] = np.round(self.pos[0], 1)
+                    a = 'x'
+                elif self.face == 'front' or self.face == 'back':
+                    self.pos[1] = np.round(self.pos[1], 1)
+                    a = 'y'
+                else:
+                    self.pos[-1] = self.zt  
+                    a = 'z' 
+                
+            else:
+                self.pos[-1] = self.zt
+
+
+            if self.pos[-1] < 0:
+                print (self.inclusion_bound)
+                print (self.pos)
+                print (a)
+                print ('Big ISsue')
+
+            # print (self.pos)
             #print ('new pos', self.pos)
             return True
         
@@ -290,7 +344,7 @@ class photons():
         # Now check is the photon packet is reflected or transmitted. 
         if self.eta() <= Ri:
             # Reverses the z direction of the photon packet.
-            #print (Ri)
+     
             '''
             print (Ri)
             print (alpha_i)
@@ -301,7 +355,7 @@ class photons():
             time.sleep(5)
             '''
             self.vel[-1] = -self.vel[-1]
-           
+            
             
         #####I think this may be redundant
         elif self.exiting: # i.e the photon is leaving the material.
@@ -312,11 +366,12 @@ class photons():
             
           
         else:
+            
             # The photon is refracted according to Snells Law
             u_x = np.float(self.vel[0] * self.ni / self.nt)
             u_y = np.float(self.vel[1] * self.ni / self.nt)
             u_z = np.float(np.sign(self.vel[-1]) * np.cos(alpha_t))
-
+            
             self.vel = np.array([u_x, u_y, u_z])
             
 
