@@ -149,7 +149,7 @@ if __name__ == '__main__':
         
         # Number of grid elements set at 5 - 10% such that it minimises relative error while 
         # maintaining good resolution.
-        N_grid = 200
+        N_grid = 100
 
         
 
@@ -408,7 +408,7 @@ if __name__ == '__main__':
             ### Fluence
                 # Saving the u_a vals allows me to plot the fluence easier
                 np.save('ua_vals', u_a_vals_array)
-                np.savez('Fluence_data_10k', a=Fluence, b=A_z)
+                np.savez('Fluence_data_50kdepth1_5', a=Fluence, b=A_z)
                 print (Fluence)
                 
 

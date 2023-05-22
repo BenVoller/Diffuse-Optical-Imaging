@@ -6,7 +6,7 @@ np.seterr(divide = 'ignore')
 
 data1 = np.load('Fluence_data_10k1.npy')
 data2 = np.load('Fluence_data_10k2.npy')
-data3= np.load('Fluence_data_10k.npz')
+data3= np.load('Fluence_data_50k1.npz')
 z_data = np.load('Fluence_data_z.npy')
 inclusion_data = np.load('inclusion_data.npz')
 raman_data = np.load('raman_data.npz')
@@ -37,7 +37,7 @@ material = medium()
 
 # Number of grid elements set at 5 - 10% such that it minimises relative error while 
     # maintaining good resolution.
-N_grid = 200
+N_grid = 100
 
 # size of Grid elements
 delta_z = material.depth / N_grid
@@ -92,7 +92,9 @@ plt.plot(alpha_vals, inclusion_da, 'x')
 plt.ylabel('R_alpha')
 
 plt.figure()
-plt.plot(R_vals[:100], inclusion_dr[:100], 'x')
+plt.plot(R_vals[10:100], inclusion_dr[10:100])
 plt.ylabel('R_dr')
+
+
 
 plt.show()
