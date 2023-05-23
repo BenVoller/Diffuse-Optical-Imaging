@@ -15,6 +15,7 @@ class photons():
         # Defines the initial x,y,z coordinates to be 000 an the cosine 
 
 
+        # Initial self.mu_s and self.mu_t
         
         self.W = weight 
         # These will record the values used to analyse the validity of the solver
@@ -65,7 +66,7 @@ class photons():
     
     def stepSize(self):
         
-        self.s_ = -np.log(self.eta())
+        self.s_ = -np.log(self.eta())/self.mu_t
 
     def Coefficient_check(self):
         # Defines whether the photon packet is within the inclusion

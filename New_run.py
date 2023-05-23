@@ -386,29 +386,34 @@ if __name__ == '__main__':
             raman_da = angle_raman / (numberPhotons*delta_omega)
 
             # Convert raw absorption data to physical quantity
-            A_z = absorption_weights / numberPhotons * delta_z 
+            print (delta_z)
+            A_z = absorption_weights / (numberPhotons * delta_z)
             Total_absorption = np.sum(A_z)
 
             Fluence = A_z / u_a_vals
+
+            print ('----------------')
+            print (np.sum(A_z))
+            print (np.sum(Fluence))
             Fluence_z = np.sum(Fluence, axis=1)
 
             reflection = True
             if reflection == True:
                 #np.savez('Transmission_data_iso', a=alpha_ia_vals, b=T_da, c=R_ir_vals, d=T_dr)
-                np.savez('Reflectance_data_inc', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
-                np.savez('inclusion_data', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
-                np.savez('raman_data', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
+                np.savez('Reflectance_data2_inc_0_7', a=alpha_ia_vals, b=R_da, c=R_ir_vals, d=R_dr)
+                np.savez('inclusion_data2_0_7', a=alpha_ia_vals, b=inclusion_da, c=R_ir_vals, d=inclusion_dr)
+                np.savez('raman_data2_0_7', a=alpha_ia_vals, b=raman_da, c=R_ir_vals, d=raman_dr)
                 # np.savez('Fluence_data_z', a=Z_i_vals, b=Fluence_z)
                 # np.savez('Fluence_data_z_1.37', a=Z_i_vals, b=Fluence_z)
                 #np.savez('Fluence_data_z_skin', a=Z_i_vals, b=Fluence_z)
-                
+                a = 1
 
             inclusion_run = True 
             if inclusion_run  == True:
             ### Fluence
                 # Saving the u_a vals allows me to plot the fluence easier
                 np.save('ua_vals', u_a_vals_array)
-                np.savez('Fluence_data_50kdepth1_5', a=Fluence, b=A_z)
+                np.savez('Fluence_data2_50kdepth0_7', a=Fluence, b=A_z)
                 print (Fluence)
                 
 

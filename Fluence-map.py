@@ -7,8 +7,12 @@ np.seterr(divide = 'ignore')
 data1 = np.load('Fluence_data_10k1.npy')
 data2 = np.load('Fluence_data_10k2.npy')
 data3= np.load('Fluence_data_50k1.npz')
+data1_5= np.load('Fluence_data_50kdepth1_5.npz')
+
 z_data = np.load('Fluence_data_z.npy')
 inclusion_data = np.load('inclusion_data.npz')
+inclusion1_5 = np.load('inclusion_data_1.5.npz')
+inclusion_07 = np.load('inclusion_data_0_7.npz')
 raman_data = np.load('raman_data.npz')
 u_a_array = np.load('ua_vals.npy')
 
@@ -20,6 +24,8 @@ alpha_vals = inclusion_data['a']
 inclusion_da = inclusion_data['b']
 R_vals = inclusion_data['c']
 inclusion_dr = inclusion_data['d']
+inclusion_dr_15 = inclusion1_5['d']
+inclusion_dr_07 = inclusion_07['d']
 
 raman_a = raman_data['b']
 raman_r = raman_data['d']
@@ -76,8 +82,10 @@ cbar.ax.set_xticklabels(['Low', 'High'])  # horizontal colorbar
 # Absorption plot
 fig, ax = plt.subplots()
 cax = ax.pcolormesh(X,Y, np.log(absorption_data))
-ax.set_title('Cube inclusion fluence')
-cbar = fig.colorbar(cax, ticks=[0, 1])
+#ax.set_title('Cube inclusion fluence')
+cbar = fig.colorbar(cax)
+ax.set_xlabel('x direction')
+ax.set_ylabel('z direction')
 cbar.ax.set_xticklabels(['Low', 'High'])  # horizontal colorbar
 '''
 plt.figure()
@@ -91,9 +99,14 @@ plt.figure()
 plt.plot(alpha_vals, inclusion_da, 'x')
 plt.ylabel('R_alpha')
 
+n = 40
 plt.figure()
-plt.plot(R_vals[10:100], inclusion_dr[10:100])
-plt.ylabel('R_dr')
+#plt.plot(R_vals[0:n], inclusion_dr[0:n]/np.sum(inclusion_dr), 'b')
+plt.plot(R_vals[0:n], inclusion_dr_15[0:n]/np.sum(inclusion_dr_15), 'g')
+plt.plot(R_vals[0:n], inclusion_dr_07[0:n]/np.sum(inclusion_dr_07), 'r')
+plt.ylabel('Normalised Raidally resolved reflection')
+plt.xlabel('radius [cm]')
+plt.legend(['depth=1.5', 'depth=0.7'])
 
 
 
